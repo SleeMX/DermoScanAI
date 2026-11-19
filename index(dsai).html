@@ -1,0 +1,1432 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DermoScan AI — демо-прототип</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0B2A5B;--teal:#12A3A8;--ink:#10233F;--bg:#F3F8FB;--blue:#0A6BD6;--ok:#16775A;--mid:#9A6200;--bad:#C2453F}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Arial,sans-serif;color:var(--ink);background:#fff;line-height:1.5}
+a{color:var(--blue)}
+section{padding:72px 24px;max-width:1080px;margin:0 auto}
+h1,h2,h3{margin:0;color:var(--navy)}
+h2{font-size:34px;font-weight:800;margin-bottom:10px;letter-spacing:-.01em}
+.lead{color:#3a4d66;font-size:17px;margin:0 0 28px;max-width:720px}
+.tag{display:inline-block;font-size:12px;font-weight:700;color:var(--teal);background:rgba(18,163,168,.1);padding:5px 12px;border-radius:999px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
+nav{position:sticky;top:0;z-index:10;background:rgba(11,42,91,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;box-shadow:0 4px 18px rgba(11,42,91,.18)}
+nav .in{max-width:1080px;margin:0 auto;padding:12px 24px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+nav b{font-weight:800;margin-right:auto}
+nav a{color:#CFE6F2;text-decoration:none;font-size:14px}
+nav a:hover{color:#fff}
+.hero{background:radial-gradient(900px 500px at 85% 10%,rgba(18,163,168,.35),transparent 60%),radial-gradient(700px 400px at 0% 100%,rgba(10,107,214,.35),transparent 60%),linear-gradient(135deg,#0B2A5B 0%,#0A3F7A 100%);color:#fff;padding:96px 24px;position:relative;overflow:hidden}
+.hero .in{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:center}
+.hero h1{color:#fff;font-size:52px;line-height:1.05;font-weight:800}
+.hero h1 span{color:#5ED6D9}
+.hero p{font-size:18px;color:#D6E8F3;margin:18px 0 26px}
+.btn{display:inline-block;background:linear-gradient(135deg,#12A3A8,#0E8F94);color:#fff;padding:14px 24px;border-radius:12px;text-decoration:none;font-weight:700;border:0;cursor:pointer;font-size:16px;font-family:inherit;box-shadow:0 8px 22px rgba(18,163,168,.35);transition:transform .2s,box-shadow .2s}.btn:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(18,163,168,.45)}
+.btn.ghost{background:transparent;border:2px solid #5ED6D9;color:#5ED6D9}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:30px}
+.stat{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:16px;backdrop-filter:blur(6px)}
+.stat b{display:block;font-size:30px;color:#5ED6D9}
+.stat span{font-size:13px;color:#D6E8F3}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:linear-gradient(180deg,#fff,var(--bg));border:1px solid #e1ecf3;border-radius:16px;padding:22px;box-shadow:0 4px 16px rgba(11,42,91,.06);transition:transform .25s,box-shadow .25s}.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(11,42,91,.12)}
+.card h3{font-size:18px;margin-bottom:6px}
+.card p{margin:0;font-size:15px;color:#3a4d66}
+.num{display:inline-flex;width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#12A3A8,#0A6BD6);color:#fff;align-items:center;justify-content:center;font-weight:800;margin-bottom:12px;box-shadow:0 6px 14px rgba(10,107,214,.3)}
+.pipe{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;margin-top:12px}
+.pipe .step{flex:1;min-width:180px;background:#fff;border:2px solid var(--navy);border-radius:12px;padding:14px}
+.pipe .arr{align-self:center;color:var(--teal);font-size:26px;font-weight:800}
+.pipe small{display:block;color:#3a4d66;font-size:14px;margin-top:4px}
+
+/* DEMO PHONE */
+.demo{display:grid;grid-template-columns:320px 1fr;gap:40px;align-items:start}
+.phone{width:320px;height:620px;border:10px solid #1b2433;border-radius:40px;background:linear-gradient(180deg,#F8FBFD,#EAF2F8);overflow:hidden;position:relative;box-shadow:0 30px 60px -12px rgba(11,42,91,.35),0 0 0 1px rgba(255,255,255,.4) inset}
+.screen{position:absolute;inset:0;padding:18px 16px;display:none;flex-direction:column;overflow-y:auto}
+.screen.on{display:flex}
+.bar{display:flex;justify-content:space-between;align-items:center;font-weight:800;color:var(--navy);margin-bottom:14px}
+.bar small{font-size:12px;color:#3a4d66;font-weight:600}
+.big{background:#fff;border-radius:16px;padding:16px;text-align:center;box-shadow:0 2px 10px rgba(11,42,91,.08)}
+.camera{margin:auto;width:150px;height:150px;border-radius:50%;background:#fff;border:0;box-shadow:0 6px 20px rgba(11,42,91,.2);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:inherit;color:var(--navy);font-weight:700;font-size:15px}
+.camera i{font-size:36px;color:var(--teal);font-style:normal}
+.hint{font-size:12px;color:#3a4d66;text-align:center;margin-top:14px}
+.scanbox{position:relative;height:300px;border-radius:16px;background:radial-gradient(circle at 50% 50%,#c49a7e,#a87a60);overflow:hidden}
+.ring{position:absolute;left:50%;top:50%;width:170px;height:170px;margin:-85px 0 0 -85px;border:3px solid #6FE6EA;border-radius:50%;box-shadow:0 0 18px #6FE6EA;animation:spin 2.4s linear infinite}
+.dot{position:absolute;left:50%;top:50%;width:16px;height:16px;margin:-8px;border-radius:50%;background:#5a3a2a}
+@keyframes spin{to{transform:rotate(360deg)}}
+.prog{height:8px;background:#dfe9f0;border-radius:6px;overflow:hidden;margin-top:14px}
+.prog div{height:100%;width:0;background:var(--teal);transition:width .1s linear}
+.res{border-radius:16px;padding:16px;color:#fff;margin-top:12px}
+.res b{font-size:20px}
+.conf{height:8px;background:rgba(255,255,255,.3);border-radius:6px;margin-top:10px;overflow:hidden}
+.conf div{height:100%;background:#fff}
+.tabs{display:flex;gap:6px;margin-bottom:10px}
+.tabs button{flex:1;border:0;background:#e6eef4;color:var(--navy);padding:8px 4px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.tabs button.on{background:var(--navy);color:#fff}
+.chip{display:flex;justify-content:space-between;gap:12px;align-items:center;background:#fff;border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:14px;border-left:6px solid var(--ok)}
+.chip.mid{border-left-color:var(--mid)}
+.chip.bad{border-left-color:var(--bad)}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.metric{background:#fff;border-radius:12px;padding:10px;text-align:center}
+.metric b{display:block;font-size:22px;color:var(--navy)}
+.metric span{font-size:12px;color:#3a4d66}
+.side{font-size:15px}
+.note{background:#FFF7E6;border:1px solid #F0D28A;border-radius:10px;padding:12px 14px;font-size:14px;margin-top:16px}
+.toggle{margin-top:14px;font-size:14px;color:#3a4d66}
+.toggle label{cursor:pointer}
+.chart{background:#fff;border:1px solid #e1ecf3;border-radius:16px;padding:20px;margin-top:8px;box-shadow:0 8px 24px rgba(11,42,91,.07)}
+.chart svg{width:100%;height:auto;display:block}
+.bars{display:flex;gap:30px;align-items:flex-end;height:240px;border-bottom:3px solid var(--ink);padding:0 20px}
+.bars > div{flex:1;text-align:center}
+.bars .v{font-weight:800;font-size:28px;color:var(--navy)}
+.bars .col{margin:8px auto 0;width:100%;max-width:160px;border-radius:8px 8px 0 0;transition:height .6s}
+.bars .lbl{margin-top:8px;font-size:15px}
+.foot{background:linear-gradient(135deg,#0B2A5B,#0A3F7A);color:#CFE6F2;padding:40px 24px;font-size:14px}
+.foot .in{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr;gap:24px}
+.foot b{color:#fff}
+.disc{font-size:13px;color:#3a4d66;background:var(--bg);border-radius:10px;padding:12px 14px;margin-top:20px}
+/* --- v2: анамнез, маршрут, сравнение, анимации --- */
+.tabbar{margin-top:auto;display:flex;justify-content:space-around;font-size:12px;padding-top:10px;border-top:1px solid #dfe9f0}
+.tabbar a{color:#3a4d66;text-decoration:none;padding:4px 8px;border-radius:8px}
+.tabbar a.on{color:var(--blue);font-weight:700;background:#e7f1fb}
+.field{margin-bottom:10px;font-size:13px}
+.field label{display:block;font-weight:600;color:var(--navy);margin-bottom:4px}
+.field select,.field textarea{width:100%;border:1px solid #cddbe6;border-radius:10px;padding:8px;font-family:inherit;font-size:13px;background:#fff;color:var(--ink)}
+.field textarea{resize:none}
+.btn.small{padding:11px 14px;font-size:14px;width:100%;box-shadow:none}
+.layers{background:#fff;border-radius:12px;padding:10px 12px;margin-top:10px;font-size:12.5px;border:1px solid #dfe9f0}
+.layers div{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px dashed #e3ecf2}
+.layers div:last-child{border-bottom:0}
+.layers span:first-child{color:#3a4d66}
+.layers span:last-child{font-weight:600;text-align:right}
+.route{background:#fff;border-radius:12px;padding:10px 12px;margin-top:10px;font-size:12.5px;border-left:5px solid var(--bad)}
+.route ol{margin:6px 0 0;padding-left:18px}
+.statuscard{border-radius:14px;padding:12px 14px;color:#fff;margin-bottom:12px;background:linear-gradient(135deg,#1E9E6A,#15855A)}
+.statuscard.mid{background:linear-gradient(135deg,#E0A030,#C98A1E)}
+.statuscard.bad{background:linear-gradient(135deg,#D9534F,#B93C38)}
+.cmp{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid #e1ecf3;border-radius:16px;overflow:hidden;box-shadow:0 4px 16px rgba(11,42,91,.06);font-size:15px}
+.cmp th,.cmp td{padding:14px 16px;text-align:left;border-bottom:1px solid #e9f0f5;vertical-align:top}
+.cmp tr:last-child td{border-bottom:0}
+.cmp th{background:var(--navy);color:#fff;font-weight:700}
+.cmp td:first-child{font-weight:600;color:var(--navy);width:24%}
+.cmp td.us{background:#EAF7F7}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}.ring{animation:none}}
+@media (max-width:860px){
+  .hero .in,.demo,.grid3,.grid2,.foot .in{grid-template-columns:1fr}
+  .hero h1{font-size:38px}
+  .stats{grid-template-columns:1fr}
+  .phone{margin:0 auto}
+  .foot .in div{text-align:left!important}
+  .cmp{font-size:13px}.cmp th,.cmp td{padding:10px}
+}
+@media (max-width:360px){.phone{width:100%}}
+
+/* --- v3: внешний вид и логотип --- */
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+nav .in{gap:10px}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none;color:#fff;font-weight:800;font-size:18px;margin-right:auto;border-radius:12px;padding:4px 8px 4px 4px;transition:background .2s,transform .2s}
+.logo em{font-style:normal;color:#5ED6D9}
+.logo:hover{background:rgba(255,255,255,.08)}
+.logo:active{transform:scale(.96)}
+.logo svg{transition:transform .5s cubic-bezier(.3,1.5,.5,1)}
+.logo:hover svg{transform:rotate(-12deg) scale(1.08)}
+.logo.pulse svg{animation:pulse .7s ease}
+@keyframes pulse{0%{transform:scale(1)}40%{transform:scale(1.25) rotate(8deg)}100%{transform:scale(1)}}
+nav .links{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav .links::-webkit-scrollbar{display:none}
+nav .links a{padding:7px 12px;border-radius:999px;white-space:nowrap;transition:background .2s,color .2s}
+nav .links a.active{background:rgba(94,214,217,.18);color:#fff}
+.progress{height:3px;width:0;background:linear-gradient(90deg,#5ED6D9,#0A6BD6);transition:width .1s linear}
+.grad{background:linear-gradient(90deg,#5ED6D9,#8FB8FF);-webkit-background-clip:text;background-clip:text;color:transparent!important}
+.hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.09) 1px,transparent 1px);background-size:26px 26px;mask-image:linear-gradient(180deg,#000,transparent 85%);-webkit-mask-image:linear-gradient(180deg,#000,transparent 85%);pointer-events:none}
+.hero .in{position:relative}
+.hero-vis{position:relative;height:380px;display:flex;align-items:center;justify-content:center}
+.orbit{position:absolute;width:330px;height:330px;border:1px dashed rgba(94,214,217,.35);border-radius:50%;animation:spin 40s linear infinite}
+.orbit.o2{width:250px;height:250px;border-color:rgba(143,184,255,.3);animation-duration:28s;animation-direction:reverse}
+.glass{position:relative;width:280px;padding:20px;border-radius:22px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 24px 60px rgba(0,0,0,.25);animation:bob 6s ease-in-out infinite}
+.gl-k{font-size:12px;color:#BFD9EA}
+.gl-v{font-size:22px;font-weight:800;color:#fff}
+.gl-big{font-size:34px;font-weight:800;color:#fff}
+.shield{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#1E9E6A,#5ED6D9);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:20px}
+.spark{width:100%;height:auto;margin:6px 0}
+.spark-line{stroke-dasharray:400;stroke-dashoffset:400;animation:draw 2.2s .4s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.float{position:absolute;font-size:12.5px;font-weight:600;color:#fff;padding:8px 12px;border-radius:999px;background:rgba(11,42,91,.7);border:1px solid rgba(94,214,217,.5);backdrop-filter:blur(6px);animation:bob 5s ease-in-out infinite}
+.f1{bottom:34px;right:0}.f2{bottom:8px;left:8%;animation-delay:-1.6s}.f3{top:4px;right:4%;animation-delay:-3.2s}
+section.alt{max-width:none;background:linear-gradient(180deg,#F3F8FB,#fff);padding-left:max(24px,calc((100% - 1032px)/2));padding-right:max(24px,calc((100% - 1032px)/2))}
+.lead{max-width:760px}
+h2{background:linear-gradient(90deg,#0B2A5B,#0A6BD6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ptitle{cursor:pointer}
+.foot-logo{display:inline-flex;margin-bottom:8px;font-size:16px}
+.foot-logo:hover{background:rgba(255,255,255,.08)}
+@media (max-width:860px){.hero .btn.ghost{margin-left:0!important;margin-top:10px}.f1{bottom:20px}.hero-vis{height:320px}.orbit{width:270px;height:270px}.orbit.o2{width:200px;height:200px}.logo span{display:none}.float{font-size:11.5px}}
+@media (prefers-reduced-motion:reduce){.orbit,.glass,.float{animation:none}.spark-line{animation:none;stroke-dashoffset:0}html{scroll-behavior:auto}}
+
+/* --- v4: анамнез, камера, украшения --- */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.opt{border:1px solid #cddbe6;background:#fff;color:var(--ink);font-family:inherit;font-size:12px;padding:6px 10px;border-radius:999px;cursor:pointer;transition:all .15s}
+.opt:hover{border-color:var(--teal)}
+.opt.on{background:linear-gradient(135deg,#12A3A8,#0A6BD6);color:#fff;border-color:transparent;box-shadow:0 4px 10px rgba(10,107,214,.25)}
+.src{display:flex;gap:6px;margin-top:12px}
+.srcbtn{flex:1;border:0;border-radius:10px;padding:10px 4px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:#fff;color:var(--navy);box-shadow:0 2px 8px rgba(11,42,91,.1);transition:transform .15s}
+.srcbtn:hover{box-shadow:0 0 0 2px #12A3A8 inset,0 2px 8px rgba(11,42,91,.1)}
+.srcbtn.on{background:linear-gradient(135deg,#0E7F84,#0A5FC0);color:#fff}
+.srcbtn:active{transform:scale(.96)}
+#cam,#shotCv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+.scanbox .ring,.scanbox .cross{z-index:2}
+.cross{position:absolute;inset:0;pointer-events:none;background:linear-gradient(#6FE6EA,#6FE6EA) center/1px 40px no-repeat,linear-gradient(#6FE6EA,#6FE6EA) center/40px 1px no-repeat;opacity:.8}
+.qual{background:#E9F7F0;border:1px solid #9BD6B8;border-radius:10px;padding:8px 10px;font-size:12px;margin-top:10px}
+.qual.warn{background:#FFF7E6;border-color:#F0D28A}
+.phone::before{content:"";position:absolute;top:8px;left:50%;transform:translateX(-50%);width:90px;height:22px;background:#1b2433;border-radius:0 0 14px 14px;z-index:5}
+.phone::after{content:"";position:absolute;inset:0;border-radius:30px;pointer-events:none;background:linear-gradient(125deg,rgba(255,255,255,.35) 0%,transparent 28%);z-index:6}
+.phone .screen{padding-top:34px}
+.card{position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;left:0;top:0;height:3px;width:100%;background:linear-gradient(90deg,#12A3A8,#0A6BD6);transform:scaleX(0);transform-origin:left;transition:transform .35s}
+.card:hover::before{transform:scaleX(1)}
+.btn{position:relative;overflow:hidden}
+.btn:not(.ghost):not(.small)::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-20deg);animation:shine 4s ease-in-out infinite}
+@keyframes shine{0%,70%{left:-60%}100%{left:130%}}
+.tag::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:7px;vertical-align:1px;animation:blink 2s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+.cmp th:last-child{background:linear-gradient(135deg,#12A3A8,#0A6BD6)}
+.stat{transition:transform .25s,background .25s}.stat:hover{transform:translateY(-4px);background:rgba(255,255,255,.14)}
+.demo{position:relative}
+.demo::before{content:"";position:absolute;left:0;top:40px;width:320px;height:420px;background:radial-gradient(circle,rgba(18,163,168,.22),transparent 65%);z-index:-1;pointer-events:none}
+@media (prefers-reduced-motion:reduce){.btn::after,.tag::before{animation:none}}
+
+/* --- v5: признаки ABCD --- */
+.fx{display:grid;grid-template-columns:96px 1fr 64px;align-items:center;gap:8px;padding:4px 0!important;border-bottom:0!important}
+.fx span{color:#3a4d66;font-size:12px}
+.fx i{display:block;height:7px;background:#e6eef4;border-radius:5px;overflow:hidden}
+.fx i b{display:block;height:100%;border-radius:5px;transition:width .8s}
+.fx em{font-style:normal;font-size:11.5px;font-weight:600;text-align:right;color:var(--ink)}
+.fxhead{border-bottom:1px dashed #e3ecf2!important;margin-bottom:2px}
+.fxhead span:last-child{font-weight:700}
+
+/* --- v5: справочник --- */
+.dzgrid .card{padding:20px}
+.dz-ic{width:46px;height:46px;border-radius:14px;background:color-mix(in srgb,var(--c) 14%,#fff);display:flex;align-items:center;justify-content:center;margin-bottom:12px;border:1px solid color-mix(in srgb,var(--c) 30%,#fff)}
+.dz-ic span{width:18px;height:18px;border-radius:50%;background:var(--c);box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 22%,transparent)}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.bdg{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:#E9F5EF;color:#1E7A52}
+.bdg.warn{background:#FDECEA;color:#B23A36}
+.abcde{margin-top:28px;background:linear-gradient(135deg,#0B2A5B,#0A4C86);color:#fff;border-radius:22px;padding:28px;display:grid;grid-template-columns:1fr 2fr;gap:24px;box-shadow:0 18px 40px rgba(11,42,91,.25)}
+.abcde h3{color:#fff;font-size:24px;margin:10px 0 8px}
+.abcde p{color:#CFE3F2;font-size:15px;margin:0}
+.abcde .tag{background:rgba(94,214,217,.15);color:#5ED6D9}
+.abgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.ab{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:14px;transition:transform .2s,background .2s}
+.ab:hover{transform:translateY(-4px);background:rgba(255,255,255,.14)}
+.ab b{display:flex;width:38px;height:38px;border-radius:12px;align-items:center;justify-content:center;background:linear-gradient(135deg,#5ED6D9,#0A6BD6);font-size:20px;margin-bottom:10px}
+.ab h4{margin:0 0 4px;color:#fff;font-size:15px}
+.ab p{font-size:13px;color:#BFD9EA}
+.ab:last-child b{background:linear-gradient(135deg,#F0B44C,#E0703A)}
+@media (max-width:980px){.abcde{grid-template-columns:1fr}.abgrid{grid-template-columns:repeat(2,1fr)}}
+
+/* --- v5: наполнение, фон, чёткие края --- */
+body{background:#F5F9FC}
+.decor{position:fixed;inset:0;z-index:0;pointer-events:none;color:#12A3A8;overflow:hidden}
+.decor svg{position:absolute;opacity:.09;animation:drift 18s ease-in-out infinite}
+.decor svg:nth-child(2n){color:#0A6BD6;animation-duration:24s;animation-delay:-6s}
+.decor svg:nth-child(3n){animation-duration:30s;animation-delay:-12s}
+@keyframes drift{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(14px,-18px) rotate(12deg)}}
+nav,header,section,footer{position:relative;z-index:1}
+nav{z-index:20}
+section.alt{background:linear-gradient(180deg,rgba(226,238,247,.85),rgba(240,246,251,.85))}
+section{padding-top:80px;padding-bottom:80px}
+section + section{border-top:1px solid #DCE8F1}
+.card{background:#fff;border:1px solid #D3E2EC;box-shadow:0 6px 20px rgba(11,42,91,.07)}
+.card:hover{border-color:#9FCFE0}
+.pipe .step{background:#fff;box-shadow:0 6px 18px rgba(11,42,91,.07)}
+.chart,.cmp{border-color:#D3E2EC}
+.disc{background:#fff;border:1px solid #D3E2EC}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px}
+.fact{background:linear-gradient(135deg,#0B2A5B,#0A4C86);color:#fff;border-radius:18px;padding:22px;box-shadow:0 14px 30px rgba(11,42,91,.18)}
+.fact b{display:block;font-size:40px;line-height:1;font-weight:800;background:linear-gradient(90deg,#5ED6D9,#8FB8FF);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:10px}
+.fact span{font-size:14.5px;color:#D6E8F3}
+.journey{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;position:relative}
+.journey::before{content:"";position:absolute;top:27px;left:9%;right:9%;height:3px;background:linear-gradient(90deg,#12A3A8,#0A6BD6);border-radius:3px;z-index:0}
+.js{position:relative;z-index:1;text-align:center;background:#fff;border:1px solid #D3E2EC;border-radius:16px;padding:0 14px 18px;margin-top:28px;box-shadow:0 6px 20px rgba(11,42,91,.07)}
+.jn{width:54px;height:54px;margin:-28px auto 10px;border-radius:50%;background:linear-gradient(135deg,#12A3A8,#0A6BD6);color:#fff;font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center;border:4px solid #F5F9FC;box-shadow:0 8px 18px rgba(10,107,214,.3)}
+.js h3{font-size:16px;margin-bottom:6px}
+.js p{font-size:13.5px;color:#3a4d66;margin:0}
+.stack{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.stack span{background:#fff;border:1px solid #D3E2EC;border-radius:999px;padding:7px 14px;font-size:14px;font-weight:600;color:var(--navy);box-shadow:0 3px 10px rgba(11,42,91,.05)}
+.side{background:#fff;border:1px solid #D3E2EC;border-radius:18px;padding:22px;box-shadow:0 6px 20px rgba(11,42,91,.07)}
+@media (max-width:860px){.facts{grid-template-columns:1fr}.journey{grid-template-columns:1fr;gap:6px}.journey::before{display:none}.decor svg{opacity:.06}}
+@media (prefers-reduced-motion:reduce){.decor svg{animation:none}}
+
+@media (max-width:860px){.cmp th,.cmp td{padding:9px 8px;font-size:12.5px;word-break:break-word}.cmp td:first-child{width:auto}}
+html,body{overflow-x:clip}
+
+.screen>*{flex-shrink:0}
+.layers .fx{display:grid}
+.layers .fxhead{display:flex}
+
+/* --- v6: язык и закреплённое меню --- */
+nav#top-nav{position:sticky;top:0;z-index:30}
+.lang{display:flex;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:3px;margin-left:8px;flex-shrink:0}
+.lang button{border:0;background:transparent;color:#CFE6F2;font-family:inherit;font-weight:700;font-size:12.5px;padding:6px 11px;border-radius:999px;cursor:pointer;transition:background .2s,color .2s}
+.lang button.on{background:linear-gradient(135deg,#12A3A8,#0A6BD6);color:#fff;box-shadow:0 3px 10px rgba(10,107,214,.35)}
+.lang button:not(.on):hover{color:#fff}
+nav .in{flex-wrap:nowrap}
+nav .links{min-width:0;flex:0 1 auto}
+nav .links a{padding:7px 9px;font-size:13.5px}
+.logo{flex-shrink:0}
+@media (max-width:860px){nav .in{flex-wrap:wrap}.lang{margin-left:auto}nav .links{order:3;width:100%;flex:1 1 100%}}
+
+/* --- v7: безопасность, паспорт, буква E, доступность --- */
+.btn{background:linear-gradient(135deg,#0E7F84,#0A6268)}
+.opt.on{background:linear-gradient(135deg,#0E7F84,#0A5FC0)}
+.tag{color:#0B6F73}
+.btn.ghost{color:#5ED6D9}
+.statuscard{background:linear-gradient(135deg,#16775A,#11634B)}
+.statuscard.ok{background:linear-gradient(135deg,#16775A,#11634B)}
+.statuscard.mid{background:linear-gradient(135deg,#9A6200,#7F5100)}
+.statuscard.bad{background:linear-gradient(135deg,#C2453F,#A23733)}
+.statuscard.none{background:linear-gradient(135deg,#0B2A5B,#123E7A)}
+.statuscard.na{background:#5B6B80}
+.demo-warn{background:#FFF4E5;border:1px solid #F0C27A;color:#5A3A00;border-radius:12px;padding:12px 16px;margin:0 0 22px;font-size:15px;line-height:1.45}
+.ptitle{background:none;border:0;font:inherit;color:inherit;padding:0;cursor:pointer;font-weight:800}
+.linkbtn{display:block;width:100%;background:#fff;border:1px solid #CFE0EA;border-radius:12px;padding:10px;font-family:inherit;font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;margin-bottom:6px}
+#pickRow .field{margin-bottom:8px}
+#ghost{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;display:none;z-index:1}
+.ghostCtl{display:none;align-items:center;gap:8px;font-size:11.5px;color:#3a4d66;margin-top:8px}.ghostCtl input{flex:1}
+.srcbtn.alt{background:#EAF3F9;color:var(--navy)}
+.resk{font-size:11px;opacity:.92;text-transform:uppercase;letter-spacing:.04em}
+.res b{font-size:18px;line-height:1.25;display:block;margin-top:2px}
+.ressub{font-size:12.5px;margin-top:4px;line-height:1.35}
+.redflag{background:#FDECEA;border:1px solid #F3B6B3;color:#7A1F1B;border-radius:10px;padding:8px 10px;font-size:12px;margin-top:10px;line-height:1.4}
+.cmpres{background:#fff;border:1px solid #dfe9f0;border-radius:12px;padding:10px 12px;margin-top:10px}
+.cmphead{font-weight:700;color:var(--navy);font-size:12.5px;margin-bottom:6px}
+.crow{display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:3px 0;border-bottom:1px dashed #e3ecf2}
+.crow.warn b{color:var(--bad)}
+.cmpverdict{font-weight:700;font-size:12.5px;margin-top:6px;line-height:1.35}
+.layers .fx{grid-template-columns:104px 1fr 76px}
+.fx span small{display:block;font-size:10px;color:#5a6b80;font-weight:400}
+.fx em{font-size:11px}
+.always{font-size:11.5px;color:#5A3A00;background:#FFF4E5;border-radius:10px;padding:8px 10px;margin-top:10px;line-height:1.4}
+.rowbtns{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}.rowbtns .btn{flex:1;min-width:120px}
+.btn.ghostbtn{background:#fff;color:var(--navy);border:1px solid #CFE0EA;box-shadow:none}
+.btn.ghostbtn::after{display:none}
+.empty{background:#fff;border:1px dashed #b9cfdc;border-radius:12px;padding:14px;text-align:center;margin-bottom:8px}
+.lesItem{display:flex;align-items:center;gap:10px;width:100%;background:#fff;border:1px solid #dfe9f0;border-radius:12px;padding:8px;margin-bottom:8px;cursor:pointer;font-family:inherit;text-align:left}
+.lesItem img{width:48px;height:48px;border-radius:10px;object-fit:cover}
+.lesTxt{flex:1;display:flex;flex-direction:column;font-size:13px;color:var(--ink)}.lesTxt small{color:#5a6b80;font-size:11.5px}
+.dotc{width:14px;height:14px;border-radius:50%;flex:none}
+.ba canvas{width:100%;height:auto;border-radius:10px;display:block;background:#d8c0a8}
+.ba input{width:100%;margin-top:6px}
+.balbl{display:flex;justify-content:space-between;font-size:11px;color:#5a6b80}
+.legend{font-size:11px;color:#5a6b80;margin-top:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px}
+.chip img.tl{width:38px;height:38px;border-radius:8px;object-fit:cover;flex:none}
+.chip{align-items:center}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.modal{position:fixed;inset:0;background:rgba(11,42,91,.55);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal[hidden]{display:none}
+.modal-in{background:#fff;border-radius:16px;max-width:720px;width:100%;max-height:90vh;overflow:auto;padding:22px}
+#docSheet h3{margin:0 0 6px;font-size:22px}
+.docmeta{font-size:12.5px;color:#5a6b80;margin:6px 0}
+.docsec{border-top:1px solid #e3ecf2;padding:10px 0;font-size:14px}
+.docthumbs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.docthumbs figure{margin:0;width:96px;font-size:11px;color:#3a4d66}.docthumbs img{width:96px;height:96px;object-fit:cover;border-radius:8px;display:block}
+body.modal-open{overflow:hidden}
+.abnote{margin-top:16px}
+:focus-visible{outline:3px solid #0A6BD6;outline-offset:2px}
+@media print{body *{visibility:hidden}#docModal,#docModal *{visibility:visible}#docModal{position:absolute;inset:0;background:#fff;display:block}.modal-in{max-height:none}.modal .rowbtns{display:none}}
+.menuBtn{display:none;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-family:inherit;font-weight:700;font-size:13px;padding:7px 14px;border-radius:999px;cursor:pointer}
+@media (max-width:860px){html{scroll-padding-top:70px}.menuBtn{display:inline-block;order:2;margin-left:auto}.lang{order:3;margin-left:8px!important}nav .in{flex-wrap:wrap}nav .links{display:none;order:4;width:100%;flex-wrap:wrap;overflow-x:visible;padding-bottom:6px}nav.open .links{display:flex}}
+</style>
+</head>
+<body>
+
+<div class="decor" aria-hidden="true">
+<svg style="top:12%;left:3%;width:120px" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="50" cy="50" r="14" fill="currentColor" opacity=".5"/><circle cx="30" cy="38" r="4" fill="currentColor"/><circle cx="66" cy="62" r="3" fill="currentColor"/></svg>
+<svg style="top:28%;right:4%;width:90px" viewBox="0 0 100 100"><polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="currentColor" stroke-width="3"/><polygon points="50,30 70,40 70,60 50,70 30,60 30,40" fill="currentColor" opacity=".4"/></svg>
+<svg style="top:46%;left:6%;width:60px" viewBox="0 0 100 100"><path d="M42 10h16v32h32v16H58v32H42V58H10V42h32z" fill="currentColor"/></svg>
+<svg style="top:62%;right:8%;width:140px" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4 7"/><circle cx="50" cy="50" r="26" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+<svg style="top:78%;left:4%;width:110px" viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="42" ry="30" fill="none" stroke="currentColor" stroke-width="2.5"/><ellipse cx="44" cy="48" rx="13" ry="11" fill="currentColor" opacity=".45"/><circle cx="72" cy="40" r="4" fill="currentColor"/></svg>
+<svg style="top:8%;right:22%;width:46px" viewBox="0 0 100 100"><path d="M42 10h16v32h32v16H58v32H42V58H10V42h32z" fill="currentColor"/></svg>
+<svg style="top:90%;right:26%;width:80px" viewBox="0 0 100 100"><polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="none" stroke="currentColor" stroke-width="3"/></svg>
+<svg style="top:36%;left:42%;width:30px" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="currentColor"/></svg>
+<svg style="top:70%;left:46%;width:70px" viewBox="0 0 120 60"><path d="M0 30 Q15 0 30 30 T60 30 T90 30 T120 30" fill="none" stroke="currentColor" stroke-width="4"/></svg>
+<svg style="top:54%;right:30%;width:24px" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="currentColor"/></svg>
+</div>
+<nav id="top-nav"><div class="in">
+  <a href="#top" class="logo" id="logoBtn" aria-label="DermoScan AI — наверх"><svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5ED6D9"/><stop offset="1" stop-color="#0A6BD6"/></linearGradient></defs><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7L16 2z" fill="url(#lg)"/><circle cx="16" cy="15" r="5" fill="none" stroke="#fff" stroke-width="2.2"/><circle cx="16" cy="15" r="1.6" fill="#fff"/><path d="M16 7v3M16 20v3M8 15h3M21 15h3" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span>DermoScan <em>AI</em></span></a>
+  <button type="button" class="menuBtn" id="menuBtn" aria-expanded="false" aria-controls="navLinks">Меню</button>
+  <div class="links" id="navLinks">
+  <a href="#problem">Проблема</a>
+  <a href="#approach">Подход</a>
+  <a href="#compare">Аналоги</a>
+  <a href="#demo">Демо</a>
+  <a href="#guide">Справочник</a>
+  <a href="#results">Результаты</a>
+  <a href="#method">Методология</a>
+  </div>
+  <div class="lang" role="group" aria-label="Язык"><button type="button" data-l="ru" class="on" aria-pressed="true">РУС</button><button type="button" data-l="kk" aria-pressed="false">ҚАЗ</button></div>
+</div><div class="progress" id="progress"></div></nav>
+
+<header class="hero" id="top"><div class="in">
+  <div>
+    <h1>DermoScan <span class="grad">AI</span></h1>
+    <p>Интеллектуальная система скрининга и мониторинга кожных образований. Смартфон помогает заметить изменения кожи со временем и подсказывает, когда нужен визит к врачу.</p>
+    <a class="btn" href="#demo">Проверить пятно</a>
+    <a class="btn ghost" href="#results" style="margin-left:8px">Результаты</a>
+    <div class="stats">
+      <div class="stat"><b data-num="3">3</b><span>уровня анализа: визуальный, контекстный, динамический</span></div>
+      <div class="stat"><b>0</b><span>снимков отправляется на сервер: анализ идёт на устройстве</span></div>
+      <div class="stat"><b data-num="50">50</b><span>респондентов в апробации прототипа</span></div>
+    </div>
+  </div>
+  <div class="hero-vis" aria-hidden="true">
+    <div class="orbit"></div><div class="orbit o2"></div>
+    <div class="glass">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <div><div class="gl-k">Демо-пример · буква E</div><div class="gl-v">Образование меняется</div></div>
+        <div class="shield" style="background:linear-gradient(135deg,#C2453F,#E0703A)">E</div>
+      </div>
+      <div class="gl-k" style="margin-top:14px">Размер в кадре за последний период · 3 снимка</div>
+      <svg viewBox="0 0 220 70" class="spark"><defs><linearGradient id="sg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#5ED6D9" stop-opacity=".55"/><stop offset="1" stop-color="#5ED6D9" stop-opacity="0"/></linearGradient></defs><polygon points="0,70 0,52 110,36 220,8 220,70" fill="url(#sg)"/><polyline points="0,52 110,36 220,8" fill="none" stroke="#5ED6D9" stroke-width="3" stroke-linecap="round" class="spark-line"/><circle cx="0" cy="52" r="4" fill="#fff"/><circle cx="110" cy="36" r="4" fill="#fff"/><circle cx="220" cy="8" r="5" fill="#fff"/></svg>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><span class="gl-big">+43%</span><span class="gl-k" style="text-align:right">Покажите дерматологу</span></div>
+    </div>
+    <div class="float f1">CNN · визуальный</div>
+    <div class="float f2">Анамнез · контекст</div>
+    <div class="float f3">Динамика · паспорт</div>
+  </div>
+</div></header>
+
+<section id="problem">
+  <div class="tag">Проблема</div>
+  <h2>Почему люди откладывают диагностику</h2>
+  <p class="lead">Мы выделили четыре фактора, которые сдерживают раннюю диагностику в регионах.</p>
+  <div class="facts">
+    <div class="fact"><b>≈99%</b><span>пятилетняя выживаемость при локализованной меланоме (SEER, США). При отдалённых метастазах — около 36%.</span></div>
+    <div class="fact"><b>+15%</b><span>рост заболеваемости меланомой в Казахстане за 2012–2022 годы, раком кожи — +24% (КазНИИОиР, 2024).</span></div>
+    <div class="fact"><b>109 / 289</b><span>смертей и новых случаев меланомы в год в Казахстане (оценка МАИР ВОЗ). Высокая доля смертей может указывать на позднее выявление.</span></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Географическая удалённость</h3><p>Консультация дерматолога требует денег и времени, поэтому визит откладывают «до последнего».</p></div>
+    <div class="card"><h3>Дефицит специалистов</h3><p>Кадры сконцентрированы в республиканских центрах и крупных городах. На местах первичную диагностику проводят врачи общей практики.</p></div>
+    <div class="card"><h3>Психологический барьер</h3><p>Страх медицинских процедур и незнание того, что важно отслеживать.</p></div>
+    <div class="card"><h3>Нет «умного» скрининга</h3><p>Без первичного скрининга в регионах болезни находят поздно, и лечение становится дороже.</p></div>
+  </div>
+  <div class="disc" style="margin-top:20px"><b>Аналоги:</b> большинство приложений анализируют один снимок, не учитывают динамику и анамнез и не объясняют, куда идти дальше.</div>
+</section>
+
+<section id="approach" class="alt">
+  <div class="tag">Подход</div>
+  <h2>Мультимодальный анализ</h2>
+  <p class="lead">Три уровня обработки данных работают вместе. Итог — рекомендация, нужен ли визит к врачу.</p>
+  <div class="grid3">
+    <div class="card"><div class="num">1</div><h3>Визуальный анализ</h3><p>Свёрточная нейросеть (CNN), предобученная на медицинских датасетах (например, ISIC Archive), классифицирует новообразования.</p></div>
+    <div class="card"><div class="num">2</div><h3>Контекстный анализ</h3><p>Модуль анамнеза учитывает факторы риска и разбирает описание жалоб по ключевым словам (упрощённый NLP). Тревожные симптомы сразу ведут к рекомендации врача.</p></div>
+    <div class="card"><div class="num">3</div><h3>Динамический трекинг</h3><p>«Цифровой паспорт» кожи фиксирует изменения во времени, поэтому аномалии видны и по динамике, а не только по одному снимку.</p></div>
+  </div>
+  <h3 style="margin:34px 0 4px">Конвейер обработки снимка</h3>
+  <div class="pipe">
+    <div class="step"><b>Препроцессинг</b><small>нормализация освещения и цветового баланса</small></div>
+    <div class="arr">→</div>
+    <div class="step"><b>Признаки (CNN)</b><small>симметрия, границы, текстура, пигментные включения</small></div>
+    <div class="arr">→</div>
+    <div class="step"><b>Инференс</b><small>confidence score: доброкачественное / подозрительное</small></div>
+  </div>
+</section>
+
+<section id="compare">
+  <div class="tag">Отличие от аналогов</div>
+  <h2>Что уже есть и чем мы отличаемся</h2>
+  <p class="lead">Отслеживать родинки по фото умеют и другие приложения. Мы сравнили DermoScan AI с двумя известными приложениями. Наше отличие — в сочетании функций и в работе на русском и казахском языках.</p>
+  <div style="overflow-x:auto">
+  <table class="cmp">
+    <tr><th scope="col">Функция</th><th scope="col">SkinVision</th><th scope="col">UMSkinCheck</th><th scope="col">DermoScan AI</th></tr>
+    <tr><td>Автоматическая оценка снимка</td><td>Да: алгоритм и панель дерматологов</td><td>Нет</td><td class="us">Да: признаки A, B, C, D (в прототипе — эвристика)</td></tr>
+    <tr><td>Факторы риска</td><td>Анкета профиля риска</td><td>Калькулятор риска</td><td class="us">Анамнез и «красные флаги», которые всегда ведут к врачу</td></tr>
+    <tr><td>Динамика</td><td>Хранение фото для сравнения</td><td>Фото-обзор тела и напоминания</td><td class="us">Количественное сравнение: размер, контур, цвет (ΔE)</td></tr>
+    <tr><td>Для врача</td><td>Можно поделиться фото</td><td>Можно поделиться фото</td><td class="us">Готовая сводка: анамнез, снимки, изменения</td></tr>
+    <tr><td>Языки</td><td>Английский и 8 европейских</td><td>Английский</td><td class="us">Русский и казахский</td></tr>
+    <tr><td>Где обрабатывается снимок</td><td>Отправляется в сервис</td><td>На устройстве</td><td class="us">На устройстве, без сервера</td></tr>
+  </table>
+  </div>
+  <p style="font-size:13px;color:#3a4d66;margin:12px 0 0">По описаниям в App Store и публикациям разработчиков, ноябрь 2026. UMSkinCheck — приложение Мичиганского университета (2012).</p>
+</section>
+
+
+<section id="how">
+  <div class="tag">Как это работает</div>
+  <h2>Путь пользователя: от снимка до врача</h2>
+  <p class="lead">Пять шагов, которые проходит пользователь. Каждый шаг можно попробовать в прототипе ниже.</p>
+  <div class="journey">
+    <div class="js"><div class="jn">1</div><h3>Анамнез</h3><p>Возраст, тип кожи, родинки, симптомы и болезни у родственников.</p></div>
+    <div class="js"><div class="jn">2</div><h3>Снимок</h3><p>Камера с сеткой-ретиклом помогает навести фокус и не смазать кадр.</p></div>
+    <div class="js"><div class="jn">3</div><h3>Препроцессинг</h3><p>Проверка освещённости и резкости, выделение границ образования.</p></div>
+    <div class="js"><div class="jn">4</div><h3>Анализ</h3><p>Признаки снимка, факторы риска и сравнение с прошлыми сканами.</p></div>
+    <div class="js"><div class="jn">5</div><h3>Паспорт и маршрут</h3><p>Скан сохраняется в историю. При тревожном тренде — рекомендация врача.</p></div>
+  </div>
+</section>
+
+<section id="demo" class="alt">
+  <div class="tag">Интерактивный прототип</div>
+  <h2>Попробуйте приложение</h2>
+  <p class="lead">Полный цикл: анамнез → снимок → понятная рекомендация → цифровой паспорт, где каждый повторный снимок сравнивается с прошлым (буква E правила ABCDE).</p>
+  <div class="demo-warn" role="note"><b>Демо-прототип, не диагноз.</b> Если образование растёт, меняется, кровоточит или не заживает 4 недели, покажите его дерматологу, даже если приложение не нашло признаков риска.</div>
+
+  <div class="demo">
+    <div class="phone" id="phone">
+
+      <!-- Главная -->
+      <div class="screen on" data-s="home">
+        <div class="bar"><button type="button" class="ptitle" onclick="go('home')">DermoScan <span style="color:#0E7F84">AI</span></button> <small>Главная</small></div>
+        <div id="homeStatus" class="statuscard none">
+          <div style="font-size:12px;opacity:.9">Последний результат</div>
+          <div style="font-size:18px;font-weight:800;line-height:1.25" id="homeStatusTxt">Сканов пока нет</div>
+          <div style="font-size:12px;opacity:.9;margin-top:2px" id="homeStatusSub">Начните с кнопки «Сканирование»</div>
+        </div>
+        <div class="big" style="margin-bottom:12px">
+          <button class="camera" onclick="startFlow('new')"><i>◉</i>Сканирование</button>
+        </div>
+        <button type="button" class="linkbtn" onclick="go('pass')" id="homePass">Цифровой паспорт кожи</button>
+        <div class="hint">Снимок обрабатывается только на этом устройстве. Это не диагноз.</div>
+        <div class="tabbar">
+          <a href="#" class="on" onclick="go('home');return false">Главная</a>
+          <a href="#" onclick="go('pass');return false">Паспорт</a>
+          <a href="#" onclick="go('anam');return false">Профиль</a>
+        </div>
+      </div>
+
+      <!-- Анамнез (контекстный модуль) -->
+      <div class="screen" data-s="anam">
+        <div class="bar">Анамнез <small id="anamStep">Профиль</small></div>
+        <div style="font-size:12.5px;color:#3a4d66;margin-bottom:10px">Ответы помогают учесть факторы риска. Веса факторов в прототипе условные.</div>
+        <div class="field"><label for="aAge">Возраст</label>
+          <select id="aAge">
+            <option value="0">До 18 лет (заполняет родитель)</option>
+            <option value="0" selected>18–29 лет</option>
+            <option value="1">30–39 лет</option>
+            <option value="1">40–49 лет</option>
+            <option value="2">50–64 года</option>
+            <option value="2">65 лет и старше</option>
+          </select></div>
+        <div class="field"><label for="aSkin">Тип кожи</label>
+          <select id="aSkin"><option value="2">Светлая, всегда обгорает</option><option value="1" selected>Средняя, иногда обгорает</option><option value="0">Смуглая, редко обгорает</option></select></div>
+        <div class="field"><label for="aMoles">Количество родинок на теле</label>
+          <select id="aMoles"><option value="0">Меньше 20</option><option value="1">20–50</option><option value="2">Больше 50</option></select></div>
+        <div class="field"><label>Что беспокоит в этом образовании</label>
+          <div class="chips" data-group="sym">
+            <button type="button" class="opt" data-red="1">Растёт</button>
+            <button type="button" class="opt" data-red="1">Меняет цвет или форму</button>
+            <button type="button" class="opt" data-red="1">Кровоточит</button>
+            <button type="button" class="opt" data-red="1">Не заживает больше 4 недель</button>
+            <button type="button" class="opt" data-red="1">Тёмная полоса под ногтем</button>
+            <button type="button" class="opt" data-w="1">Чешется</button>
+            <button type="button" class="opt" data-w="1">Болит</button>
+            <button type="button" class="opt" data-w="0">Шелушится</button>
+          </div></div>
+        <div class="field"><label>Особенности</label>
+          <div class="chips" data-group="feat">
+            <button type="button" class="opt" data-w="1">Рыжие или светлые волосы, веснушки</button>
+            <button type="button" class="opt" data-w="2">Много необычных родинок</button>
+            <button type="button" class="opt" data-w="2">Ослабленный иммунитет</button>
+          </div></div>
+        <div class="field"><label>Солнце</label>
+          <div class="chips" data-group="sun">
+            <button type="button" class="opt" data-w="1">Солнечные ожоги в детстве</button>
+            <button type="button" class="opt" data-w="1">Солярий</button>
+            <button type="button" class="opt" data-w="1">Много времени на солнце</button>
+          </div></div>
+        <div class="field"><label>Заболевания кожи у родственников</label>
+          <div class="chips" data-group="fam">
+            <button type="button" class="opt" data-w="2">Меланома</button>
+            <button type="button" class="opt" data-w="1">Другой рак кожи</button>
+            <button type="button" class="opt" data-w="0">Псориаз</button>
+            <button type="button" class="opt" data-w="0">Атопический дерматит</button>
+            <button type="button" class="opt" data-w="0">Аллергия кожи</button>
+          </div></div>
+        <div class="field"><label>Что было у вас</label>
+          <div class="chips" data-group="own">
+            <button type="button" class="opt" data-w="2">Меланома или рак кожи</button>
+            <button type="button" class="opt" data-w="1">Удаляли родинку</button>
+            <button type="button" class="opt" data-w="0">Акне</button>
+            <button type="button" class="opt" data-w="0">Атопический дерматит</button>
+            <button type="button" class="opt" data-w="0">Псориаз</button>
+            <button type="button" class="opt" data-w="0">Грибок кожи</button>
+          </div></div>
+        <div class="field"><label for="aText">Опишите своими словами</label>
+          <textarea id="aText" rows="3" placeholder="Например: родинка на руке стала больше и иногда чешется"></textarea></div>
+        <button class="btn small" onclick="saveAnam()" id="anamBtn">Сохранить</button>
+        <div class="tabbar">
+          <a href="#" onclick="go('home');return false">Главная</a>
+          <a href="#" onclick="go('pass');return false">Паспорт</a>
+          <a href="#" class="on" onclick="go('anam');return false">Профиль</a>
+        </div>
+      </div>
+
+      <!-- Сканирование -->
+      <div class="screen" data-s="scan">
+        <div class="bar">Сканирование <small><a href="#" onclick="go('home');return false" style="color:var(--blue)">Назад</a></small></div>
+        <div id="pickRow">
+          <div class="field"><label for="tgtSel">Что снимаем</label><select id="tgtSel"></select></div>
+          <div class="field" id="areaField"><label for="aArea">Где находится образование</label>
+            <select id="aArea"><option value="Не указано">Не указано</option><option value="Лицо">Лицо</option><option value="Шея">Шея</option><option value="Спина">Спина</option><option value="Грудь или живот">Грудь или живот</option><option value="Руки">Руки</option><option value="Ноги">Ноги</option><option value="Ладони или стопы">Ладони или стопы</option><option value="Под ногтем">Под ногтем</option></select></div>
+        </div>
+        <div class="scanbox" id="scanbox">
+          <video id="cam" playsinline muted></video>
+          <canvas id="shotCv" aria-label="Снимок новообразования с выделенным контуром"></canvas>
+          <img id="ghost" alt="">
+          <div class="ring" id="ring"></div>
+          <div class="dot" id="dot"></div>
+          <div class="cross" id="cross"></div>
+        </div>
+        <div class="ghostCtl" id="ghostCtl"><label for="ghostOp">Прозрачность прошлого снимка</label><input type="range" id="ghostOp" min="0" max="80" value="40"></div>
+        <div class="src" id="srcRow">
+          <button type="button" class="srcbtn" id="camBtn" onclick="camAction()">Камера</button>
+          <button type="button" class="srcbtn" onclick="$('fileIn').click()">Фото</button>
+          <button type="button" class="srcbtn" onclick="exampleAction()">Пример</button>
+          <input type="file" id="fileIn" accept="image/*" hidden>
+          <input type="file" id="camIn" accept="image/*" capture="environment" hidden>
+        </div>
+        <div class="src" id="exRow" style="display:none">
+          <button type="button" class="srcbtn alt" onclick="runExample(false)">Ровная родинка</button>
+          <button type="button" class="srcbtn alt" onclick="runExample(true)">Неровное образование</button>
+        </div>
+        <div class="prog" id="progWrap" style="display:none"><div id="progBar"></div></div>
+        <div style="font-size:13px;text-align:center;margin-top:8px;color:#3a4d66" id="progTxt" role="status" aria-live="polite">Выберите источник снимка</div>
+        <div class="hint" id="scanHint">Снимайте при дневном свете с 10–15 см. Для масштаба положите рядом монету.</div>
+        <div id="qBox"></div>
+        <div id="resBox" style="display:none" aria-live="polite"></div>
+      </div>
+
+      <!-- Цифровой паспорт -->
+      <div class="screen" data-s="pass">
+        <div class="bar">Цифровой паспорт <small id="passSum"></small></div>
+        <div id="passEmpty" class="empty">
+          <div style="font-weight:700;color:var(--navy);margin-bottom:6px">Пока нет снимков</div>
+          <div style="font-size:12.5px;color:#3a4d66">Сделайте первый скан. Чтобы сразу увидеть, как работает сравнение снимков, загрузите пример.</div>
+        </div>
+        <div id="lesList"></div>
+        <div class="rowbtns">
+          <button type="button" class="btn small ghostbtn" onclick="loadExample()" id="exBtn">Загрузить пример</button>
+          <button type="button" class="btn small" onclick="openSummary()" id="sumBtn">Сводка для врача</button>
+        </div>
+        <div class="tabbar">
+          <a href="#" onclick="go('home');return false">Главная</a>
+          <a href="#" class="on" onclick="go('pass');return false">Паспорт</a>
+          <a href="#" onclick="go('anam');return false">Профиль</a>
+        </div>
+      </div>
+
+      <!-- Одно образование -->
+      <div class="screen" data-s="lesion">
+        <div class="bar"><span id="lesTitle">Образование</span> <small><a href="#" onclick="go('pass');return false" style="color:var(--blue)">Назад</a></small></div>
+        <div id="lesStatus"></div>
+        <div id="cmpBox"></div>
+        <div style="font-size:14px;font-weight:700;color:var(--navy);margin:12px 0 8px">Все снимки</div>
+        <div id="lesTimeline"></div>
+        <div class="rowbtns">
+          <button type="button" class="btn small" onclick="startFlow(curLesion)">Повторить снимок</button>
+          <button type="button" class="btn small ghostbtn" onclick="playEvolution()" id="evoBtn">Показать эволюцию</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="side">
+      <h3 style="font-size:20px;margin-bottom:10px">Как пройти демо</h3>
+      <ol style="padding-left:20px;margin:0 0 14px">
+        <li style="margin-bottom:8px"><b>Анамнез.</b> Возраст, тип кожи, родинки, симптомы, солнце и болезни у родственников. Тревожные симптомы («растёт», «кровоточит», «не заживает») сразу ведут к рекомендации врача.</li>
+        <li style="margin-bottom:8px"><b>Снимок.</b> Камера, фото или пример. Приложение проверяет свет и резкость, находит контур образования и оценивает признаки A, B, C, D.</li>
+        <li style="margin-bottom:8px"><b>Решение.</b> Одна понятная рекомендация со сроком: наблюдать или показать врачу.</li>
+        <li style="margin-bottom:8px"><b>Буква E — эволюция.</b> Повторный снимок того же образования сравнивается с прошлым: размер, форма, цвет. Попробуйте: «Паспорт» → «Загрузить пример» → откройте образование.</li>
+      </ol>
+      <div class="toggle">
+        <button class="btn ghost" style="padding:8px 14px;font-size:14px;color:var(--teal);border-color:var(--teal)" onclick="resetDemo()">Сбросить демо</button>
+      </div>
+      <div class="note"><b>Важно:</b> это демонстрационный прототип. Обученной нейросети в нём нет: снимок оценивается упрощённым алгоритмом признаков ABCD, веса анамнеза и пороги сравнения условные. Анализ рассчитан на пигментные образования (родинки, пятна). Снимки хранятся только в этом браузере. Система не ставит диагноз и не заменяет врача.</div>
+    </div>
+  </div>
+
+  <div class="modal" id="docModal" role="dialog" aria-modal="true" aria-labelledby="docTitle" hidden>
+    <div class="modal-in">
+      <div id="docSheet"></div>
+      <div class="rowbtns">
+        <button type="button" class="btn small" onclick="printSummary()">Печать</button>
+        <button type="button" class="btn small ghostbtn" onclick="closeSummary()">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+
+<section id="guide">
+  <div class="tag">Справочник</div>
+  <h2>Распространённые заболевания кожи</h2>
+  <p class="lead">Коротко о состояниях, которые чаще всего встречаются в жизни и в анкете приложения. Справочник помогает пользователю понять, о чём его спрашивают, но не заменяет осмотр врача.</p>
+  <div class="grid3 dzgrid"><div class="card dz"><div class="dz-ic" style="--c:#3B2A6B"><span></span></div><h3>Меланома</h3><p>Злокачественная опухоль из пигментных клеток. Может развиться из родинки или на чистой коже. Требует осмотра врача в ближайшее время.</p><div class="badges"><span class="bdg">не заразно</span><span class="bdg warn">срочно к врачу</span></div></div><div class="card dz"><div class="dz-ic" style="--c:#B05A4A"><span></span></div><h3>Базалиома</h3><p>Самый частый рак кожи. Растёт медленно и редко даёт метастазы, но разрушает ткани, поэтому лечение необходимо. Часто на лице: перламутровый узелок или незаживающая ранка.</p><div class="badges"><span class="bdg">не заразно</span><span class="bdg warn">к врачу</span></div></div><div class="card dz"><div class="dz-ic" style="--c:#A0623A"><span></span></div><h3>Актинический кератоз</h3><p>Шероховатое чешуйчатое пятно на открытых солнцу участках у взрослых. Это предраковое состояние — его нужно показать врачу.</p><div class="badges"><span class="bdg">не заразно</span><span class="bdg warn">к врачу</span></div></div><div class="card dz"><div class="dz-ic" style="--c:#7A5236"><span></span></div><h3>Родинка (невус)</h3><p>Доброкачественное скопление пигментных клеток. У большинства людей их десятки. Важно следить за изменениями.</p><div class="badges"><span class="bdg">не заразно</span><span class="bdg">наблюдать</span></div></div><div class="card dz"><div class="dz-ic" style="--c:#8C7A5A"><span></span></div><h3>Себорейный кератоз</h3><p>Доброкачественные «налипшие» бугристые пятна от светлых до тёмных, чаще после 40 лет. Не перерождаются, но похожие пятна стоит показать врачу.</p><div class="badges"><span class="bdg">не заразно</span><span class="bdg">наблюдать</span></div></div><div class="card dz"><div class="dz-ic" style="--c:#D9775F"><span></span></div><h3>Акне</h3><p>Воспаление сальных желёз и волосяных фолликулов: прыщи и чёрные точки. Особенно часто бывает у подростков.</p><div class="badges"><span class="bdg">не заразно</span><span class="bdg">очень частое</span></div></div><div class="card dz"><div class="dz-ic" style="--c:#C98A1E"><span></span></div><h3>Атопический дерматит (форма экземы)</h3><p>Хроническое воспаление кожи: сухость, сильный зуд, покраснение. Часто начинается в детстве.</p><div class="badges"><span class="bdg">не заразно</span><span class="bdg">хроническое</span></div></div><div class="card dz"><div class="dz-ic" style="--c:#9A5C9E"><span></span></div><h3>Псориаз</h3><p>Хроническое заболевание: красные приподнятые бляшки с серебристыми чешуйками на локтях, коленях, голове.</p><div class="badges"><span class="bdg">не заразно</span><span class="bdg">хроническое</span></div></div><div class="card dz"><div class="dz-ic" style="--c:#3E8E7E"><span></span></div><h3>Грибок кожи</h3><p>Кольцевидные шелушащиеся пятна, поражение стоп и ногтей. Передаётся при контакте и через общие вещи. Диагноз ставит врач: похожие пятна бывают при экземе.</p><div class="badges"><span class="bdg warn">заразно</span><span class="bdg">лечится</span></div></div><div class="card dz"><div class="dz-ic" style="--c:#D9534F"><span></span></div><h3>Крапивница (аллергия)</h3><p>Зудящие волдыри, которые появляются и исчезают за часы. Часто это реакция на аллерген.</p><div class="badges"><span class="bdg">не заразно</span><span class="bdg warn">при отёке губ или затруднённом дыхании — 103 или 112</span></div></div><div class="card dz"><div class="dz-ic" style="--c:#6B7F99"><span></span></div><h3>Бородавки</h3><p>Доброкачественные разрастания кожи, их вызывает вирус папилломы человека. Диагноз ставит врач.</p><div class="badges"><span class="bdg warn">заразно</span><span class="bdg">лечится</span></div></div><div class="card dz"><div class="dz-ic" style="--c:#9AA9B8"><span></span></div><h3>Витилиго</h3><p>Потеря пигмента: чёткие белые пятна на коже. Не заразно и не опасно для жизни, но лечится у дерматолога.</p><div class="badges"><span class="bdg">не заразно</span><span class="bdg">хроническое</span></div></div></div>
+
+  <div class="abcde">
+    <div class="abcde-head">
+      <div class="tag" style="margin:0">Правило ABCDE</div>
+      <h3>Когда родинку стоит показать врачу</h3>
+      <p>Дерматологи используют пять признаков. Первые четыре прототип оценивает по снимку, а пятый, «эволюцию», отслеживает цифровой паспорт кожи.</p>
+    </div>
+    <div class="abgrid"><div class="ab"><b>A</b><h4>Асимметрия</h4><p>Половинки образования не похожи друг на друга</p></div><div class="ab"><b>B</b><h4>Границы</h4><p>Края неровные, размытые или «рваные»</p></div><div class="ab"><b>C</b><h4>Цвет</h4><p>Несколько оттенков: коричневый, чёрный, красный, синеватый</p></div><div class="ab"><b>D</b><h4>Диаметр</h4><p>Больше 6 мм, примерно как ластик на карандаше</p></div><div class="ab"><b>E</b><h4>Эволюция</h4><p>Образование меняется со временем: размер, цвет, форма</p></div></div>
+  </div>
+  <div class="disc abnote">6 мм — ориентир: меланома бывает меньше. Правило ABCDE не распознаёт узловую (выпуклую, быстро растущую) и беспигментную (розовую) меланому, а также образования на ладонях, стопах и под ногтем. Важен и признак «гадкого утёнка»: родинка, не похожая на остальные.</div>
+  <div class="disc">Справочная информация общего характера. Диагноз ставит только врач.</div>
+</section>
+
+<section id="safety">
+  <div class="tag">Безопасность и данные</div>
+  <h2>Ответственность прототипа</h2>
+  <p class="lead">Приложение для здоровья должно в первую очередь не навредить: не успокаивать зря и бережно обращаться с данными.</p>
+  <div class="grid2">
+    <div class="card"><h3>Снимки остаются на устройстве</h3><p>Анализ идёт прямо в браузере или телефоне. Снимки и анамнез не отправляются на сервер и хранятся только у пользователя.</p></div>
+    <div class="card"><h3>Персональные данные</h3><p>Перед первым использованием пользователь даёт согласие. Обработка строится по Закону РК «О персональных данных и их защите» от 21 мая 2013 года № 94-V.</p></div>
+    <div class="card"><h3>Не диагноз и не медицинское изделие</h3><p>Прототип даёт рекомендацию, когда показаться врачу, и не ставит диагноз. Перед клиническим применением потребуется оценка его статуса как медицинского изделия по законодательству РК.</p></div>
+    <div class="card"><h3>Защита от ложного успокоения</h3><p>Тревожные симптомы всегда ведут к врачу, зелёного «здоров» нет, а непригодный снимок не оценивается. Пороги прототипа консервативные и требуют клинической проверки.</p></div>
+  </div>
+</section>
+
+<section id="results" class="alt">
+  <div class="tag">Результаты</div>
+  <h2>Апробация прототипа</h2>
+  <p class="lead">Анкетирование 50 потенциальных пользователей (взрослые пациенты и родители). По ответам респондентов, доля повторных обращений к специалисту составила 30% до и 75% после использования приложения. Это предварительный результат самоотчёта.</p>
+  <div class="chart">
+    <div class="bars">
+      <div>
+        <div class="v" data-count="30">30%</div>
+        <div class="col" data-h="120" style="height:120px;background:#8CC8F0"></div>
+        <div class="lbl">До внедрения</div>
+      </div>
+      <div>
+        <div class="v" data-count="75">75%</div>
+        <div class="col" data-h="225" style="height:225px;background:var(--blue)"></div>
+        <div class="lbl">После DermoScan AI</div>
+      </div>
+    </div>
+    <p style="font-size:13px;color:#3a4d66;margin:14px 0 0">Диаграмма 1. Доля респондентов, сообщивших о повторных обращениях к специалисту (самоотчёт, n = 50).</p>
+  </div>
+  <div class="grid3" style="margin-top:18px">
+    <div class="card"><h3>Мотивация к визиту</h3><p>Респонденты отмечают, что видимая динамика и понятная рекомендация подталкивают вовремя обратиться к врачу.</p></div>
+    <div class="card"><h3>Следующий шаг</h3><p>Проверить эффект строже: наблюдение 4–8 недель, подтверждённые визиты и контрольная группа без приложения.</p></div>
+    <div class="card"><h3>Ограничения</h3><p>Выборка небольшая, сравнение «до/после» основано на ответах респондентов. Точность модели будет измерена после обучения на HAM10000 (блокнот готов).</p></div>
+  </div>
+</section>
+
+
+<section id="method">
+  <div class="tag">Методология</div>
+  <h2>Четыре этапа работы над проектом</h2>
+  <p class="lead">Междисциплинарный подход: системный анализ, инженерия программного обеспечения и социально-медицинское исследование.</p>
+  <div class="grid2 meth">
+    <div class="card"><div class="num">1</div><h3>Теоретико-аналитический этап</h3><p>Сравнительный анализ существующих дерматологических приложений, статистические отчёты ВОЗ и публикации по медицинской информатике.</p></div>
+    <div class="card"><div class="num">2</div><h3>Системное проектирование</h3><p>Принципы Human-Centered Design. Модульная структура: сканирование, трекинг и ассистент работают автономно, но в одной экосистеме.</p></div>
+    <div class="card"><div class="num">3</div><h3>Технологическая реализация</h3><p>Swift и SwiftUI для приложения, свёрточная нейросеть (CNN) для снимков, разбор анамнеза по ключевым словам. Целевая платформа — iOS; на сайте показан веб-прототип интерфейса, где снимок оценивается алгоритмом признаков ABCD.</p></div>
+    <div class="card"><div class="num">4</div><h3>Эмпирическая апробация</h3><p>Анкетирование 50 респондентов через Google Forms (самоотчёт). Обучение и проверка модели на HAM10000 — следующий этап, блокнот готов.</p></div>
+  </div>
+  <div class="grid2" style="margin-top:22px">
+    <div class="card"><h3>Ограничения данных</h3><p>HAM10000 — дерматоскопические снимки, в основном светлой кожи. Приложение снимает обычной камерой телефона, поэтому точность на HAM10000 не переносится на телефонные снимки напрямую. Следующий шаг — проверка на снимках смартфона (например, открытый набор PAD-UFES-20) и на коже разных типов.</p></div>
+    <div class="card"><h3>Пороги прототипа (условные)</h3><p>Изменение считается заметным, если размер в кадре изменился на 20% и больше, совпадение контура ниже 75%, асимметрия выросла на 0,06 и больше или цвет изменился на ΔE ≥ 10. Два признака — «показать врачу», один — «наблюдать». Пороги подобраны вручную и требуют проверки врачом.</p></div>
+  </div>
+  <div class="stack">
+    <span>Swift</span><span>SwiftUI</span><span>CNN</span><span>NLP</span><span>ISIC Archive</span><span>Human-Centered Design</span><span>Google Forms</span><span>HAM10000</span>
+  </div>
+</section>
+
+
+
+<footer class="foot"><div class="in">
+  <div>
+    <a href="#top" class="logo foot-logo"><svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5ED6D9"/><stop offset="1" stop-color="#0A6BD6"/></linearGradient></defs><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7L16 2z" fill="url(#lg2)"/><circle cx="16" cy="15" r="5" fill="none" stroke="#fff" stroke-width="2.2"/><circle cx="16" cy="15" r="1.6" fill="#fff"/><path d="M16 7v3M16 20v3M8 15h3M21 15h3" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span>DermoScan <em>AI</em></span></a><br>
+    Проект мобильного приложения на Swift / SwiftUI и его веб-прототип для первичного скрининга кожных образований.
+  </div>
+  <div style="text-align:right">
+    Источники: Кодекс РК № 360-VI (2020); Закон РК № 94-V «О персональных данных и их защите» (2013); Концепция развития ИИ на 2024–2029 годы (2024); ВОЗ (2021); Тулеуова Д.А. и др., Онкология и радиология Казахстана (2024); МАИР ВОЗ, GLOBOCAN; American Cancer Society / SEER; Esteva et al., Nature (2017); Tschandl et al., Scientific Data (2018); ISIC Archive.
+  </div>
+</div></footer>
+
+<script>
+/* ---------- состояние ---------- */
+const pad2=n=>String(n).padStart(2,'0');
+const fmtDate=ts=>{const d=new Date(ts);return pad2(d.getDate())+'.'+pad2(d.getMonth()+1)+'.'+d.getFullYear();};
+const COLOR={ok:'var(--ok)',mid:'var(--mid)',bad:'var(--bad)',na:'#5B6B80'};
+const STATUS={ok:'Тревожных признаков не найдено',mid:'Нужно наблюдение',bad:'Рекомендуется осмотр врача'};
+const ADVICE={ok:'Это не исключает болезнь. Повторите проверку через 3 месяца.',mid:'Сфотографируйте снова через 2–4 недели при том же свете.',bad:'Покажите образование дерматологу в ближайшие 1–2 недели.'};
+const AREA_W={'Ладони или стопы':2,'Под ногтем':2};
+const STORE='dsPassport';
+let lesions=[],anamDone=false,afterAnam=false,scanTimer=null,curLesion=null,scanTarget='new';
+function loadStore(){try{const s=JSON.parse(localStorage.getItem(STORE)||'null');if(s&&Array.isArray(s.lesions))lesions=s.lesions;}catch(e){lesions=[];}}
+function saveStore(){try{localStorage.setItem(STORE,JSON.stringify({lesions}));}catch(e){}}
+loadStore();
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- языки: русский и казахский ---------- */
+let LANG='ru';
+const KK={"Открываем камеру телефона. Если она не открылась, нажмите «Фото».": "Телефон камерасын ашамыз. Егер ол ашылмаса, «Фото» батырмасын басыңыз.", "Проблема": "Мәселе", "Подход": "Тәсіл", "Аналоги": "Аналогтар", "Демо": "Демо", "Справочник": "Анықтамалық", "Результаты": "Нәтижелер", "Методология": "Әдіснама", "Язык": "Тіл", "Исследовательский проект · Информатика · Казахстан 2030": "Зерттеу жобасы · Информатика · Қазақстан 2030", "Интеллектуальная система прецизионной диагностики и анализа кожных заболеваний. Смартфон становится первичным инструментом скрининга, который отслеживает динамику состояния кожи и подсказывает, когда нужен визит к врачу.": "Тері ауруларын прецизиялық диагностикалау мен талдаудың интеллектуалды жүйесі. Смартфон тері жағдайының динамикасын бақылайтын және дәрігерге қашан бару керегін ескертетін алғашқы скрининг құралына айналады.", "Открыть демо-прототип": "Демо-прототипті ашу", "уровня анализа: визуальный, контекстный, динамический": "талдау деңгейі: визуалды, контекстік, динамикалық", "доля повторных обращений к специалисту (анкетирование)": "маманға қайта жүгінгендердің үлесі (сауалнама)", "респондентов в апробации прототипа": "респондент прототипті сынауға қатысты", "Общий статус": "Жалпы күй", "Низкий риск": "Төмен қауіп", "Умеренный риск": "Орташа қауіп", "Повышенный риск": "Жоғары қауіп", "Индекс здоровья · 6 месяцев": "Денсаулық индексі · 6 ай", "Хорошее состояние": "Жақсы жағдай", "Умеренное состояние": "Орташа жағдай", "CNN · визуальный": "CNN · визуалды", "Анамнез · контекст": "Анамнез · контекст", "Динамика · паспорт": "Динамика · паспорт", "Почему люди откладывают диагностику": "Неліктен адамдар диагностиканы кейінге қалдырады", "Мы выделили четыре фактора, которые сдерживают раннюю диагностику в регионах.": "Біз өңірлерде ерте диагностикаға кедергі келтіретін төрт факторды анықтадық.", "выживаемость при выявлении меланомы на ранней стадии. При позднем выявлении она резко падает.": "меланома ерте сатыда анықталғандағы өмір сүру көрсеткіші. Кеш анықталса, ол күрт төмендейді.", "барьера ранней диагностики: расстояние, нехватка специалистов, страх, нет скрининга.": "ерте диагностика кедергісі: қашықтық, мамандардың жетіспеуі, қорқыныш, скринингтің болмауы.", "ограничения существующих приложений: один снимок, нет анамнеза, нет маршрута к врачу.": "қолданыстағы қосымшалардың шектеуі: бір сурет, анамнез жоқ, дәрігерге бағыт жоқ.", "Географическая удалённость": "Географиялық алыстық", "Консультация дерматолога требует денег и времени, поэтому визит откладывают «до последнего».": "Дерматолог кеңесі ақша мен уақытты талап етеді, сондықтан қаралу «соңғы сәтке дейін» кейінге қалдырылады.", "Дефицит специалистов": "Мамандар тапшылығы", "Кадры сконцентрированы в республиканских центрах и крупных городах. На местах первичную диагностику проводят врачи общей практики.": "Кадрлар республикалық орталықтар мен ірі қалаларда шоғырланған. Жергілікті жерлерде алғашқы диагностиканы жалпы тәжірибелік дәрігерлер жүргізеді.", "Психологический барьер": "Психологиялық кедергі", "Страх медицинских процедур и незнание того, что важно отслеживать.": "Медициналық процедуралардан қорқу және нені бақылау маңызды екенін білмеу.", "Нет «умного» скрининга": "«Ақылды» скрининг жоқ", "Без первичного скрининга в регионах болезни находят поздно, и лечение становится дороже.": "Өңірлерде алғашқы скрининг болмағандықтан, аурулар кеш анықталады, ал емдеу қымбаттай түседі.", "Аналоги:": "Аналогтар:", "большинство приложений анализируют один снимок, не учитывают динамику и анамнез и не объясняют, куда идти дальше.": "қосымшалардың көбі бір суретті ғана талдайды, динамика мен анамнезді ескермейді және әрі қарай қайда бару керегін түсіндірмейді.", "Мультимодальный анализ": "Мультимодальды талдау", "Три уровня обработки данных работают вместе. Итог — рекомендация, нужен ли визит к врачу.": "Деректерді өңдеудің үш деңгейі бірге жұмыс істейді. Нәтижесі — дәрігерге бару қажеттілігі туралы ұсыным.", "Визуальный анализ": "Визуалды талдау", "Свёрточная нейросеть (CNN), предобученная на медицинских датасетах (например, ISIC Archive), классифицирует новообразования.": "Медициналық датасеттерде (мысалы, ISIC Archive) алдын ала оқытылған конволюциялық нейрожелі (CNN) жаңа түзілімдерді жіктейді.", "Контекстный анализ": "Контекстік талдау", "NLP-модуль собирает анамнез и факторы риска: возраст, тип кожи, семейную предрасположенность.": "NLP-модуль анамнез бен қауіп факторларын жинайды: жас, тері түрі, отбасылық бейімділік.", "Динамический трекинг": "Динамикалық бақылау", "«Цифровой паспорт» кожи фиксирует изменения во времени, поэтому аномалии видны и по динамике, а не только по одному снимку.": "Терінің «цифрлық паспорты» уақыт бойынша өзгерістерді тіркейді, сондықтан ауытқулар бір суреттен ғана емес, динамикадан да көрінеді.", "Конвейер обработки снимка": "Суретті өңдеу конвейері", "Препроцессинг": "Препроцессинг", "нормализация освещения и цветового баланса": "жарық пен түс балансын қалыпқа келтіру", "Признаки (CNN)": "Белгілер (CNN)", "симметрия, границы, текстура, пигментные включения": "симметрия, шекаралар, текстура, пигментті қосындылар", "Инференс": "Инференс", "confidence score: доброкачественное / подозрительное": "confidence score: қатерсіз / күдікті", "Отличие от аналогов": "Аналогтардан айырмашылығы", "Больше, чем классификатор «одного снимка»": "«Бір сурет» классификаторынан артық", "Три ограничения существующих приложений из нашего аналитического обзора и то, как их закрывает DermoScan AI.": "Аналитикалық шолуымыздағы қолданыстағы қосымшалардың үш шектеуі және DermoScan AI оларды қалай шешеді.", "Критерий": "Критерий", "Типичные приложения": "Әдеттегі қосымшалар", "Анализ": "Талдау", "Один снимок, без динамики во времени": "Бір сурет, уақыт бойынша динамикасыз", "«Цифровой паспорт» кожи и временная шкала здоровья": "Терінің «цифрлық паспорты» және денсаулықтың уақыт шкаласы", "Контекст": "Контекст", "Только компьютерное зрение, анамнез не запрашивается": "Тек компьютерлік көру, анамнез сұралмайды", "Контекстный модуль: возраст, тип кожи, семейная предрасположенность": "Контекстік модуль: жас, тері түрі, отбасылық бейімділік", "Что дальше": "Әрі қарай", "Вероятностный процент риска без инструкций": "Нұсқаусыз қауіптің ықтималдық пайызы", "Рекомендация и маршрут к специалисту при обоснованной необходимости": "Негізделген қажеттілік болғанда ұсыным және маманға бағыт", "Как это работает": "Бұл қалай жұмыс істейді", "Путь пользователя: от снимка до врача": "Пайдаланушы жолы: суреттен дәрігерге дейін", "Пять шагов, которые проходит пользователь. Каждый шаг можно попробовать в прототипе ниже.": "Пайдаланушы өтетін бес қадам. Әр қадамды төмендегі прототипте байқап көруге болады.", "Анамнез": "Анамнез", "Возраст, тип кожи, родинки, симптомы и болезни у родственников.": "Жас, тері түрі, меңдер, симптомдар және туыстардағы аурулар.", "Снимок": "Сурет", "Камера с сеткой-ретиклом помогает навести фокус и не смазать кадр.": "Ретикл-торы бар камера фокусты дұрыс қоюға және кадрды бұлдыратпауға көмектеседі.", "Проверка освещённости и резкости, выделение границ образования.": "Жарық пен анықтықты тексеру, түзілімнің шекарасын белгілеу.", "Признаки снимка, факторы риска и сравнение с прошлыми сканами.": "Сурет белгілері, қауіп факторлары және алдыңғы сканерлеулермен салыстыру.", "Паспорт и маршрут": "Паспорт және бағыт", "Скан сохраняется в историю. При тревожном тренде — рекомендация врача.": "Скан тарихқа сақталады. Алаңдатарлық тренд болса, дәрігерге бару ұсынылады.", "Интерактивный прототип": "Интерактивті прототип", "Попробуйте приложение": "Қосымшаны байқап көріңіз", "Полный цикл из работы: анамнез → сканирование → решение по трём уровням анализа → запись в «цифровой паспорт». Каждый новый скан появляется в истории и на временной шкале.": "Жұмыстағы толық цикл: анамнез → сканерлеу → талдаудың үш деңгейі бойынша шешім → «цифрлық паспортқа» жазу. Әр жаңа скан тарихта және уақыт шкаласында пайда болады.", "Главная": "Басты бет", "Сканирование": "Сканерлеу", "Искусственный интеллект для ухода за кожей. Профессиональный уход в любое время и в любом месте.": "Теріге күтім жасауға арналған жасанды интеллект. Кез келген уақытта, кез келген жерде кәсіби күтім.", "История": "Тарих", "Профиль": "Профиль", "Контекстный модуль учитывает факторы риска. Ответы сохраняются в профиле.": "Контекстік модуль қауіп факторларын ескереді. Жауаптар профильде сақталады.", "Возраст": "Жас", "До 18 лет (заполняет родитель)": "18 жасқа дейін (ата-ана толтырады)", "18–29 лет": "18–29 жас", "30–39 лет": "30–39 жас", "40–49 лет": "40–49 жас", "50–64 года": "50–64 жас", "65 лет и старше": "65 жас және одан жоғары", "Тип кожи": "Тері түрі", "Светлая, всегда обгорает": "Ақшыл, әрдайым күйеді", "Средняя, иногда обгорает": "Орташа, кейде күйеді", "Смуглая, редко обгорает": "Қараторы, сирек күйеді", "Количество родинок на теле": "Денедегі меңдер саны", "Меньше 20": "20-дан аз", "Больше 50": "50-ден көп", "Что беспокоит": "Не мазалайды", "Растёт": "Өсіп келеді", "Меняет цвет": "Түсі өзгереді", "Кровоточит": "Қанайды", "Чешется": "Қышиды", "Болит": "Ауырады", "Шелушится": "Қабыршақтанады", "Солнце и привычки": "Күн және әдеттер", "Частые ожоги": "Жиі күйіп қалу", "Солярий": "Солярий", "Много времени на солнце": "Күн астында көп болу", "Заболевания кожи у родственников": "Туыстардағы тері аурулары", "Меланома": "Меланома", "Другой рак кожи": "Терінің басқа обыры", "Псориаз": "Псориаз", "Экзема": "Экзема", "Аллергия кожи": "Тері аллергиясы", "Что было у вас": "Сізде не болған", "Удаляли новообразование": "Түзілім алынып тасталған", "Акне": "Акне", "Грибок кожи": "Тері саңырауқұлағы", "Где находится образование": "Түзілім қай жерде", "Лицо": "Бет", "Шея": "Мойын", "Спина": "Арқа", "Грудь или живот": "Кеуде немесе іш", "Руки": "Қолдар", "Ноги": "Аяқтар", "Ладони или стопы": "Алақан немесе табан", "Опишите своими словами": "Өз сөзіңізбен сипаттаңыз", "Сохранить": "Сақтау", "Сохранено ✓": "Сақталды ✓", "Шаг 1 из 2": "1-қадам, барлығы 2", "Перейти к сканированию": "Сканерлеуге өту", "Назад": "Артқа", "Камера": "Камера", "Фото": "Фото", "Выберите источник снимка": "Сурет көзін таңдаңыз", "Наведите сетку-ретикл на новообразование. Снимок обрабатывается только на этом устройстве и никуда не отправляется.": "Ретикл-торын түзілімге бағыттаңыз. Сурет тек осы құрылғыда өңделеді және ешқайда жіберілмейді.", "Временная шкала здоровья": "Денсаулықтың уақыт шкаласы", "Индекс здоровья": "Денсаулық индексі", "6 мес.": "6 ай", "3 мес.": "3 ай", "1 мес.": "1 ай", "Предыдущие сканирования": "Алдыңғы сканерлеулер", "Цветовая маркировка от «Хорошего состояния» до «Повышенного риска»": "«Жақсы жағдайдан» «Жоғары қауіпке» дейінгі түсті белгілеу", "Как пройти демо": "Демоны қалай өту керек", "Анамнез.": "Анамнез.", "При первом скане приложение просит заполнить профиль: возраст, тип кожи, количество родинок, солнце, заболевания кожи у родственников, место образования и описание своими словами.": "Алғашқы сканерлеуде қосымша профильді толтыруды сұрайды: жас, тері түрі, меңдер саны, күн, туыстардағы тері аурулары, түзілімнің орны және өз сөзіңізбен сипаттама.", "Сканирование.": "Сканерлеу.", "Три источника: живая камера, фото (на телефоне открывает камеру) или демо-образец. Приложение проверяет освещённость и резкость, находит границы образования и оценивает признаки ABCD.": "Үш көз: тірі камера, фото (телефонда камераны ашады) немесе демо-үлгі. Қосымша жарық пен анықтықты тексереді, түзілімнің шекарасын табады және ABCD белгілерін бағалайды.", "Решение.": "Шешім.", "Итог складывается из трёх уровней: визуального (признаки снимка), контекстного (анамнез) и динамического (сравнение с прошлым сканом).": "Нәтиже үш деңгейден құралады: визуалды (сурет белгілері), контекстік (анамнез) және динамикалық (алдыңғы сканмен салыстыру).", "Цифровой паспорт.": "Цифрлық паспорт.", "Скан сохраняется в истории и на временной шкале. При негативном тренде появляется маршрут к специалисту.": "Скан тарихта және уақыт шкаласында сақталады. Теріс тренд болса, маманға бағыт пайда болады.", "Демо: всегда показывать неровный образец": "Демо: әрдайым тегіс емес үлгіні көрсету", "Сбросить демо": "Демоны басынан бастау", "Важно:": "Маңызды:", "это демонстрационный прототип. Обученной нейросети в нём нет: снимок оценивается упрощённым алгоритмом признаков ABCD, а правило объединения трёх уровней задано для показа. Анализ рассчитан на пигментные образования (родинки, пятна). Снимок не покидает устройство. Система не ставит диагноз и не заменяет врача.": "бұл демонстрациялық прототип. Онда оқытылған нейрожелі жоқ: сурет ABCD белгілерінің жеңілдетілген алгоритмімен бағаланады, ал үш деңгейді біріктіру ережесі көрсету үшін берілген. Талдау пигментті түзілімдерге (меңдер, дақтар) арналған. Сурет құрылғыдан шықпайды. Жүйе диагноз қоймайды және дәрігерді алмастырмайды.", "Распространённые заболевания кожи": "Кең таралған тері аурулары", "Коротко о состояниях, которые чаще всего встречаются в жизни и в анкете приложения. Справочник помогает пользователю понять, о чём его спрашивают, но не заменяет осмотр врача.": "Өмірде және қосымша сауалнамасында жиі кездесетін жағдайлар туралы қысқаша. Анықтамалық пайдаланушыға не сұралып жатқанын түсінуге көмектеседі, бірақ дәрігердің тексеруін алмастырмайды.", "Злокачественная опухоль из пигментных клеток кожи. Часто выглядит как родинка, которая начала меняться.": "Терінің пигментті жасушаларынан пайда болатын қатерлі ісік. Көбіне өзгере бастаған меңге ұқсайды.", "не заразно": "жұқпалы емес", "важна ранняя диагностика": "ерте диагностика маңызды", "Базалиома": "Базалиома", "Самый частый вид рака кожи. Растёт медленно, чаще на лице: перламутровый узелок или ранка, которая не заживает.": "Тері обырының ең жиі түрі. Баяу өседі, көбіне бетте болады: інжу тәрізді түйін немесе жазылмайтын жара.", "к врачу": "дәрігерге", "Родинка (невус)": "Мең (невус)", "Доброкачественное скопление пигментных клеток. У большинства людей их десятки. Важно следить за изменениями.": "Пигментті жасушалардың қатерсіз жиынтығы. Адамдардың көбінде олар ондап саналады. Өзгерістерді бақылау маңызды.", "наблюдать": "бақылау", "Воспаление сальных желёз и волосяных фолликулов: прыщи и чёрные точки. Особенно часто бывает у подростков.": "Май бездері мен шаш фолликулдарының қабынуы: безеулер мен қара нүктелер. Әсіресе жасөспірімдерде жиі кездеседі.", "очень частое": "өте жиі", "Экзема (атопический дерматит)": "Экзема (атопиялық дерматит)", "Хроническое воспаление кожи: сухость, сильный зуд, покраснение. Часто начинается в детстве.": "Терінің созылмалы қабынуы: құрғақтық, қатты қышу, қызару. Көбіне балалық шақта басталады.", "хроническое": "созылмалы", "Хроническое заболевание: красные приподнятые бляшки с серебристыми чешуйками на локтях, коленях, голове.": "Созылмалы ауру: шынтақта, тізеде, баста күміс түсті қабыршақтары бар қызыл, көтеріңкі табақшалар.", "Кольцевидные шелушащиеся пятна, поражение стоп и ногтей. Передаётся при контакте и через общие вещи.": "Сақина тәрізді қабыршақтанған дақтар, табан мен тырнақтың зақымдануы. Жанасу және ортақ заттар арқылы жұғады.", "заразно": "жұқпалы", "лечится": "емделеді", "Крапивница (аллергия)": "Есекжем (аллергия)", "Зудящие волдыри, которые появляются и исчезают за часы. Часто это реакция на аллерген.": "Бірнеше сағатта пайда болып, жоғалатын қышитын көпіршіктер. Көбіне аллергенге реакция.", "при отёке лица — скорая": "бет ісінсе — жедел жәрдем", "Бородавки": "Сүйелдер", "Доброкачественные разрастания кожи, их вызывает вирус папилломы человека.": "Терінің қатерсіз өсінділері, оларды адам папилломасы вирусы тудырады.", "Правило ABCDE": "ABCDE ережесі", "Когда родинку стоит показать врачу": "Меңді дәрігерге қашан көрсету керек", "Дерматологи используют пять признаков. Первые четыре прототип оценивает по снимку, а пятый, «эволюцию», отслеживает цифровой паспорт кожи.": "Дерматологтар бес белгіні пайдаланады. Алғашқы төртеуін прототип сурет бойынша бағалайды, ал бесіншісін, «эволюцияны», терінің цифрлық паспорты бақылайды.", "Асимметрия": "Асимметрия", "Половинки образования не похожи друг на друга": "Түзілімнің жартылары бір-біріне ұқсамайды", "Границы": "Шекаралар", "Края неровные, размытые или «рваные»": "Жиектері тегіс емес, бұлыңғыр немесе «жыртық»", "Цвет": "Түс", "Несколько оттенков: коричневый, чёрный, красный, синеватый": "Бірнеше реңк: қоңыр, қара, қызыл, көкшіл", "Диаметр": "Диаметр", "Больше 6 мм, примерно как ластик на карандаше": "6 мм-ден үлкен, шамамен қарындаштағы өшіргіштей", "Эволюция": "Эволюция", "Образование меняется со временем: размер, цвет, форма": "Түзілім уақыт өте өзгереді: көлемі, түсі, пішіні", "Справочная информация общего характера и не входит в текст исследовательской работы. Перед публикацией её стоит согласовать с руководителем или врачом-дерматологом.": "Жалпы сипаттағы анықтамалық ақпарат, ол зерттеу жұмысының мәтініне кірмейді. Жарияламас бұрын оны жетекшімен немесе дерматолог дәрігермен келіскен жөн.", "Апробация прототипа": "Прототипті апробациялау", "Анкетирование среди 50 потенциальных пользователей (взрослые пациенты и родители). Оценивалась доля пациентов, которые совершили повторные визиты к специалисту.": "50 әлеуетті пайдаланушы (ересек пациенттер мен ата-аналар) арасында сауалнама жүргізілді. Маманға қайта барған пациенттердің үлесі бағаланды.", "До внедрения": "Енгізуге дейін", "После DermoScan AI": "DermoScan AI-дан кейін", "Диаграмма 1. Доля пациентов с повторными обращениями к специалисту. Высоты столбцов пропорциональны значениям.": "1-диаграмма. Маманға қайта жүгінген пациенттердің үлесі. Бағаналардың биіктігі мәндерге пропорционал.", "Мотивация к визиту": "Дәрігерге баруға ынталандыру", "Система выступает как инструмент «медицинской бдительности» и побуждает вовремя обращаться к врачу при негативных трендах.": "Жүйе «медициналық сергектік» құралы ретінде әрекет етеді және теріс трендтер болғанда дәрігерге уақытында жүгінуге ынталандырады.", "Вывод": "Қорытынды", "Платформа повышает приверженность пациентов мониторингу и лечению, а не только выдаёт оценку состояния кожи.": "Платформа тері жағдайын бағалаумен шектелмей, пациенттердің мониторинг пен емге бейілділігін арттырады.", "Ограничения": "Шектеулер", "Выборка небольшая, сравнение «до/после» основано на самооценке респондентов. Метрики точности модели в работе не приводятся.": "Іріктеме шағын, «дейін/кейін» салыстыруы респонденттердің өзін-өзі бағалауына негізделген. Жұмыста модель дәлдігінің метрикалары келтірілмеген.", "Четыре этапа работы над проектом": "Жобаның төрт кезеңі", "Междисциплинарный подход: системный анализ, инженерия программного обеспечения и социально-медицинское исследование.": "Пәнаралық тәсіл: жүйелік талдау, бағдарламалық қамтамасыз ету инженериясы және әлеуметтік-медициналық зерттеу.", "Теоретико-аналитический этап": "Теориялық-аналитикалық кезең", "Сравнительный анализ существующих дерматологических приложений, статистические отчёты ВОЗ и публикации по медицинской информатике.": "Қолданыстағы дерматологиялық қосымшаларды салыстырмалы талдау, ДДСҰ статистикалық есептері және медициналық информатика бойынша жарияланымдар.", "Системное проектирование": "Жүйелік жобалау", "Принципы Human-Centered Design. Модульная структура: сканирование, трекинг и ассистент работают автономно, но в одной экосистеме.": "Human-Centered Design қағидалары. Модульдік құрылым: сканерлеу, бақылау және ассистент дербес, бірақ бір экожүйеде жұмыс істейді.", "Технологическая реализация": "Технологиялық іске асыру", "Swift и SwiftUI для приложения, свёрточные нейросети (CNN) для изображений, NLP для анамнеза.": "Қосымша үшін Swift және SwiftUI, суреттер үшін конволюциялық нейрожелілер (CNN), анамнез үшін NLP.", "Эмпирическая апробация": "Эмпирикалық апробация", "Опросы через Google Forms, A/B-тестирование и сравнение скорости и точности с аналогами.": "Google Forms арқылы сауалнамалар, A/B-тестілеу және аналогтармен жылдамдық пен дәлдікті салыстыру.", "A/B-тестирование": "A/B-тестілеу", "Мобильное приложение на Swift / SwiftUI. Исследовательский прототип для первичного скрининга кожных заболеваний.": "Swift / SwiftUI негізіндегі мобильді қосымша. Тері ауруларының алғашқы скринингіне арналған зерттеу прототипі.", "DermoScan AI — наверх": "DermoScan AI — жоғарыға", "Например: родинка на спине стала больше и иногда чешется": "Мысалы: арқадағы мең үлкейіп, кейде қышиды", "Снимок новообразования с выделенным контуром": "Контуры белгіленген түзілім суреті", "Индекс здоровья кожи по периодам": "Кезеңдер бойынша тері денсаулығының индексі", "DermoScan AI — демо-прототип": "DermoScan AI — демо-прототип", "Последнее сканирование:": "Соңғы сканерлеу:", "Ян": "Қаң", "Фев": "Ақп", "Мар": "Нау", "Апр": "Сәу", "Май": "Мам", "Июн": "Мау", "1 нед": "1 апта", "2 нед": "2 апта", "3 нед": "3 апта", "4 нед": "4 апта", "Сейчас": "Қазір", "Скан": "Скан", "Гидратация · Хорошо": "Ылғалдылық · Жақсы", "Эластичность · Хорошо": "Серпімділік · Жақсы", "Меланин · Низкий": "Меланин · Төмен", "Текстура · Хорошо": "Текстура · Жақсы", "Наведите камеру на образование": "Камераны түзілімге бағыттаңыз", "Камера недоступна в этом окне. Нажмите «Фото»: на телефоне оно откроет камеру.": "Бұл терезеде камера қолжетімсіз. «Фото» батырмасын басыңыз: телефонда ол камераны ашады.", "Не удалось открыть файл. Выберите фото в формате JPG или PNG.": "Файлды ашу мүмкін болмады. JPG немесе PNG форматындағы фотоны таңдаңыз.", "Анализирую…": "Талдап жатырмын…", "Препроцессинг: свет и резкость…": "Препроцессинг: жарық және анықтық…", "Выделяю границы образования…": "Түзілім шекарасын анықтап жатырмын…", "Асимметрия, границы, цвет, размер…": "Асимметрия, шекаралар, түс, өлшем…", "Сопоставляю с анамнезом и историей…": "Анамнезбен және тарихпен салыстырып жатырмын…", "Готово": "Дайын", "Качество снимка:": "Сурет сапасы:", "освещённость": "жарықтандыру", "резкость": "анықтық", "темно": "қараңғы", "пересвет": "тым жарық", "норма": "қалыпты", "размыто": "бұлыңғыр", "резко": "анық", "Лучше переснять при ровном свете и без движения.": "Біркелкі жарықта және қозғалыссыз қайта түсірген дұрыс.", "Образование не найдено": "Түзілім табылмады", "Поднесите камеру ближе, чтобы образование было в центре сетки и занимало заметную часть кадра. Фон должен быть ровным.": "Камераны жақындатыңыз: түзілім тордың ортасында болып, кадрдың едәуір бөлігін алуы керек. Фон біркелкі болуы тиіс.", "Переснять": "Қайта түсіру", "Есть подозрительные признаки": "Күдікті белгілер бар", "Признаки неоднозначны": "Белгілер екіұшты", "Признаки спокойные": "Белгілер алаңдатпайды", "Маршрут к специалисту": "Маманға бағыт", "Запишитесь на консультацию дерматолога.": "Дерматологтың кеңесіне жазылыңыз.", "Покажите врачу историю сканирований из «цифрового паспорта».": "Дәрігерге «цифрлық паспорттағы» сканерлеу тарихын көрсетіңіз.", "После консультации сделайте контрольный скан.": "Кеңестен кейін бақылау сканын жасаңыз.", "Рекомендация": "Ұсыным", "Повторите сканирование через месяц и следите за трендом. Если образование меняется, обратитесь к врачу раньше.": "Бір айдан кейін сканерлеуді қайталап, трендті бақылаңыз. Түзілім өзгерсе, дәрігерге ертерек жүгініңіз.", "Продолжайте регулярный мониторинг.": "Тұрақты мониторингті жалғастырыңыз.", "Итог трёх уровней анализа": "Талдаудың үш деңгейінің қорытындысы", "1. Визуальный анализ": "1. Визуалды талдау", "A · асимметрия": "A · асимметрия", "B · границы": "B · шекаралар", "C · цвет": "C · түс", "D · размер": "D · өлшем", "кадра": "кадр", "2. Контекстный": "2. Контекстік", "3. Динамика": "3. Динамика", "Риск": "Қауіп", "высокий": "жоғары", "умеренный": "орташа", "низкий": "төмен", "Учтено": "Ескерілді", "У родственников": "Туыстарында", "В описании": "Сипаттамада", "больше 50 родинок": "50-ден көп мең", "изменение размера": "өлшемінің өзгеруі", "изменение цвета": "түсінің өзгеруі", "зуд": "қышу", "кровоточивость": "қанағыштық", "изменение формы или границ": "пішінінің немесе шекарасының өзгеруі", "шелушение": "қабыршақтану", "боль или жжение": "ауырсыну немесе күйдіру", "Негативный тренд": "Теріс тренд", "Пользователь младше 18 лет: результат стоит обсудить с родителями и врачом.": "Пайдаланушы 18 жасқа толмаған: нәтижені ата-анамен және дәрігермен талқылаған жөн.", "Сохранено в «цифровой паспорт»": "«Цифрлық паспортқа» сақталды", "демо-образец": "демо-үлгі", "ваш снимок": "сіздің суретіңіз", "Новый скан": "Жаңа скан", "Источники: Кодекс РК № 360-VI (2020); Концепция развития ИИ на 2024–2029 годы (2024); ВОЗ (2021); Esteva et al., Nature (2017); Tschandl et al., Scientific Data (2018); ISIC Archive.": "Дереккөздер: ҚР № 360-VI Кодексі (2020); Жасанды интеллектті дамытудың 2024–2029 жылдарға арналған тұжырымдамасы (2024); ДДСҰ (2021); Esteva et al., Nature (2017); Tschandl et al., Scientific Data (2018); ISIC Archive.", "Демо-прототип, не диагноз.": "Демо-прототип, диагноз емес.", "Если образование растёт, меняется, кровоточит или не заживает 4 недели, покажите его дерматологу, даже если приложение не нашло признаков риска.": "Түзілім өссе, өзгерсе, қанаса немесе 4 апта бойы жазылмаса, қосымша қауіп белгілерін таппаса да, оны дерматологқа көрсетіңіз.", "Последний результат": "Соңғы нәтиже", "Сканов пока нет": "Әзірге сканерлеу жоқ", "Начните с кнопки «Сканирование»": "«Сканерлеу» батырмасынан бастаңыз", "Цифровой паспорт кожи": "Терінің цифрлық паспорты", "Снимок обрабатывается только на этом устройстве. Это не диагноз.": "Сурет тек осы құрылғыда өңделеді. Бұл диагноз емес.", "Паспорт": "Паспорт", "Ответы помогают учесть факторы риска. Веса факторов в прототипе условные.": "Жауаптар қауіп факторларын ескеруге көмектеседі. Прототиптегі факторлардың салмағы шартты.", "Что беспокоит в этом образовании": "Бұл түзілімде не мазалайды", "Меняет цвет или форму": "Түсі немесе пішіні өзгереді", "Не заживает больше 4 недель": "4 аптадан артық жазылмайды", "Тёмная полоса под ногтем": "Тырнақ астындағы қара жолақ", "Особенности": "Ерекшеліктер", "Рыжие или светлые волосы, веснушки": "Жирен немесе ақшыл шаш, секпіл", "Много необычных родинок": "Әдеттен тыс меңдер көп", "Ослабленный иммунитет": "Әлсіреген иммунитет", "Солнце": "Күн", "Солнечные ожоги в детстве": "Балалық шақтағы күннен күю", "Атопический дерматит": "Атопиялық дерматит", "Меланома или рак кожи": "Меланома немесе тері обыры", "Удаляли родинку": "Мең алынып тасталған", "Например: родинка на руке стала больше и иногда чешется": "Мысалы: қолдағы мең үлкейіп, кейде қышиды", "Что снимаем": "Нені түсіреміз", "Не указано": "Көрсетілмеген", "Под ногтем": "Тырнақ астында", "Прозрачность прошлого снимка": "Алдыңғы суреттің мөлдірлігі", "Пример": "Мысал", "Ровная родинка": "Тегіс мең", "Неровное образование": "Тегіс емес түзілім", "Снимайте при дневном свете с 10–15 см. Для масштаба положите рядом монету.": "Күндізгі жарықта 10–15 см қашықтықтан түсіріңіз. Масштаб үшін қасына тиын қойыңыз.", "Цифровой паспорт": "Цифрлық паспорт", "Пока нет снимков": "Әзірге суреттер жоқ", "Сделайте первый скан. Чтобы сразу увидеть, как работает сравнение снимков, загрузите пример.": "Алғашқы сканерлеуді жасаңыз. Суреттерді салыстыру қалай жұмыс істейтінін бірден көру үшін мысалды жүктеңіз.", "Загрузить пример": "Мысалды жүктеу", "Сводка для врача": "Дәрігерге арналған қорытынды", "Образование": "Түзілім", "Все снимки": "Барлық суреттер", "Повторить снимок": "Суретті қайталау", "Показать эволюцию": "Эволюцияны көрсету", "Возраст, тип кожи, родинки, симптомы, солнце и болезни у родственников. Тревожные симптомы («растёт», «кровоточит», «не заживает») сразу ведут к рекомендации врача.": "Жас, тері түрі, меңдер, симптомдар, күн және туыстардағы аурулар. Алаңдатарлық симптомдар («өсіп келеді», «қанайды», «жазылмайды») бірден дәрігерге бару ұсынымына әкеледі.", "Снимок.": "Сурет.", "Камера, фото или пример. Приложение проверяет свет и резкость, находит контур образования и оценивает признаки A, B, C, D.": "Камера, фото немесе мысал. Қосымша жарық пен анықтықты тексеріп, түзілімнің контурын тауып, A, B, C, D белгілерін бағалайды.", "Одна понятная рекомендация со сроком: наблюдать или показать врачу.": "Мерзімі көрсетілген бір түсінікті ұсыным: бақылау немесе дәрігерге көрсету.", "Буква E — эволюция.": "E әрпі — эволюция.", "Повторный снимок того же образования сравнивается с прошлым: размер, форма, цвет. Попробуйте: «Паспорт» → «Загрузить пример» → откройте образование.": "Сол түзілімнің қайталама суреті алдыңғысымен салыстырылады: өлшемі, пішіні, түсі. Байқап көріңіз: «Паспорт» → «Мысалды жүктеу» → түзілімді ашыңыз.", "это демонстрационный прототип. Обученной нейросети в нём нет: снимок оценивается упрощённым алгоритмом признаков ABCD, веса анамнеза и пороги сравнения условные. Анализ рассчитан на пигментные образования (родинки, пятна). Снимки хранятся только в этом браузере. Система не ставит диагноз и не заменяет врача.": "бұл демонстрациялық прототип. Онда оқытылған нейрожелі жоқ: сурет ABCD белгілерінің жеңілдетілген алгоритмімен бағаланады, анамнез салмақтары мен салыстыру шектері шартты. Талдау пигментті түзілімдерге (меңдер, дақтар) арналған. Суреттер тек осы браузерде сақталады. Жүйе диагноз қоймайды және дәрігерді алмастырмайды.", "Печать": "Басып шығару", "Закрыть": "Жабу", "Полный цикл: анамнез → снимок → понятная рекомендация → цифровой паспорт, где каждый повторный снимок сравнивается с прошлым (буква E правила ABCDE).": "Толық цикл: анамнез → сурет → түсінікті ұсыным → цифрлық паспорт, онда әр қайталама сурет алдыңғысымен салыстырылады (ABCDE ережесінің E әрпі).", "Тревожных признаков не найдено": "Алаңдатарлық белгілер табылмады", "Нужно наблюдение": "Бақылау қажет", "Рекомендуется осмотр врача": "Дәрігердің тексеруі ұсынылады", "Это не исключает болезнь. Повторите проверку через 3 месяца.": "Бұл ауруды жоққа шығармайды. 3 айдан кейін тексеруді қайталаңыз.", "Сфотографируйте снова через 2–4 недели при том же свете.": "2–4 аптадан кейін сол жарықта қайта суретке түсіріңіз.", "Покажите образование дерматологу в ближайшие 1–2 недели.": "Түзілімді 1–2 апта ішінде дерматологқа көрсетіңіз.", "Новое образование": "Жаңа түзілім", "снимков": "суреттер", "Совместите образование с прошлым снимком": "Түзілімді алдыңғы суретпен сәйкестендіріңіз", "Камера недоступна в этом окне. Нажмите «Фото»: на телефоне можно выбрать снимок или сделать новый.": "Бұл терезеде камера қолжетімсіз. «Фото» батырмасын басыңыз: телефонда дайын суретті таңдауға немесе жаңасын түсіруге болады.", "Сопоставляю с анамнезом и прошлыми снимками…": "Анамнезбен және алдыңғы суреттермен салыстырып жатырмын…", "Заметных изменений не выявлено": "Елеулі өзгерістер анықталмады", "Есть изменения: повторите снимок через 2–4 недели": "Өзгерістер бар: суретті 2–4 аптадан кейін қайталаңыз", "Образование меняется: это повод показаться дерматологу": "Түзілім өзгеріп жатыр: бұл дерматологқа көрінуге себеп", "Условия съёмки отличаются: сравнение неточное, переснимите при том же свете": "Түсіру жағдайлары әртүрлі: салыстыру дәл емес, сол жарықта қайта түсіріңіз", "Размер": "Өлшемі", "Совпадение контура": "Контурдың сәйкестігі", "Цвет (ΔE)": "Түс (ΔE)", "изменился": "өзгерді", "без заметных изменений": "елеулі өзгеріссіз", "Снимок непригоден для оценки": "Сурет бағалауға жарамсыз", "Снимайте при дневном свете, без вспышки, держите телефон неподвижно.": "Күндізгі жарықта, жарқылсыз түсіріңіз, телефонды қозғалтпай ұстаңыз.", "Тревожные симптомы": "Алаңдатарлық симптомдар", "При таких симптомах нужен осмотр врача, даже если снимок выглядит спокойно.": "Мұндай симптомдар болса, сурет алаңдатпаса да, дәрігердің тексеруі қажет.", "Буква E: сравнение с": "E әрпі: алдыңғы сурет", "Буква E: динамика": "E әрпі: динамика", "Это первый снимок образования. Повторите его через 1–3 месяца, и приложение покажет, как оно изменилось.": "Бұл түзілімнің алғашқы суреті. Оны 1–3 айдан кейін қайталаңыз, қосымша оның қалай өзгергенін көрсетеді.", "Итог · это не диагноз": "Қорытынды · бұл диагноз емес", "Что видно на снимке": "Суретте не көрінеді", "похожи ли половинки": "жартылары ұқсас па", "ровный ли край": "жиегі тегіс пе", "сколько оттенков": "неше реңк бар", "доля кадра, не мм": "кадр үлесі, мм емес", "тревожно": "алаңдатарлық", "внимание": "назар аударыңыз", "спокойно": "алаңдатпайды", "Сохранено в паспорт": "Паспортқа сақталды", "снимок": "сурет", "пример": "мысал", "Открыть паспорт": "Паспортты ашу", "Последний снимок:": "Соңғы сурет:", "Последний снимок": "Соңғы сурет", "образований": "түзілімдер", "Что изменилось": "Не өзгерді", "Было и стало": "Бұрын және қазір", "Было / стало": "Бұрын / қазір", "Было": "Бұрын", "Стало": "Қазір", "прежний контур": "бұрынғы контур", "новый контур": "жаңа контур", "Сделайте повторный снимок через 1–3 месяца, чтобы увидеть изменения.": "Өзгерістерді көру үшін 1–3 айдан кейін қайталама сурет жасаңыз.", "тип кожи": "тері түрі", "родинок": "меңдер", "Сформировано": "Құрастырылды", "Самостоятельные снимки пользователя. Это не диагноз.": "Пайдаланушының өзі түсірген суреттері. Бұл диагноз емес.", "Анамнез не заполнен.": "Анамнез толтырылмаған.", "Изменения за последний период": "Соңғы кезеңдегі өзгерістер", "размер": "өлшемі", "совпадение контура": "контурдың сәйкестігі", "цвет": "түс", "Пороги сравнения экспериментальные и не проверены клинически.": "Салыстыру шектері эксперименттік және клиникалық тексерілмеген.", "не заживает": "жазылмайды", "Проверить пятно": "Дақты тексеру", "Буква E · сравнение снимков": "E әрпі · суреттерді салыстыру", "Образование меняется": "Түзілім өзгеріп жатыр", "Размер в кадре · 3 снимка": "Кадрдағы өлшемі · 3 сурет", "Покажите дерматологу": "Дерматологқа көрсетіңіз", "контур совпал на 58%": "контур 58%-ға сәйкес келді", "Форма": "Пішіні", "пятилетняя выживаемость при локализованной меланоме (SEER, США). При отдалённых метастазах — около 36%.": "жергілікті меланома кезіндегі бесжылдық өмір сүру көрсеткіші (SEER, АҚШ). Алыс метастаздар болса — шамамен 36%.", "Выборка небольшая, сравнение «до/после» основано на ответах респондентов. Точность модели будет измерена после обучения на HAM10000 (блокнот готов).": "Іріктеме шағын, «дейін/кейін» салыстыруы респонденттердің жауаптарына негізделген. Модель дәлдігі HAM10000-да оқытылғаннан кейін өлшенеді (блокнот дайын).", "Злокачественная опухоль из пигментных клеток. Может развиться из родинки или на чистой коже. Требует осмотра врача в ближайшее время.": "Пигментті жасушалардан пайда болатын қатерлі ісік. Меңнен немесе таза теріде дамуы мүмкін. Жақын арада дәрігердің тексеруін қажет етеді.", "срочно к врачу": "дәрігерге шұғыл", "Самый частый рак кожи. Растёт медленно и редко даёт метастазы, но разрушает ткани, поэтому лечение необходимо. Часто на лице: перламутровый узелок или незаживающая ранка.": "Тері обырының ең жиі түрі. Баяу өседі және сирек метастаз береді, бірақ тіндерді бұзады, сондықтан емдеу қажет. Көбіне бетте: інжу тәрізді түйін немесе жазылмайтын жара.", "Актинический кератоз": "Актиникалық кератоз", "Шероховатое чешуйчатое пятно на открытых солнцу участках у взрослых. Это предраковое состояние — его нужно показать врачу.": "Ересектерде күн түсетін аймақтардағы кедір-бұдыр қабыршақты дақ. Бұл обыр алды жағдайы — оны дәрігерге көрсету керек.", "Себорейный кератоз": "Себореялық кератоз", "Доброкачественные «налипшие» бугристые пятна от светлых до тёмных, чаще после 40 лет. Не перерождаются, но похожие пятна стоит показать врачу.": "Ашықтан қараға дейінгі қатерсіз «жабысқан» бұдырлы дақтар, көбіне 40 жастан кейін. Қатерлі ісікке айналмайды, бірақ ұқсас дақтарды дәрігерге көрсеткен жөн.", "Атопический дерматит (форма экземы)": "Атопиялық дерматит (экзема түрі)", "Кольцевидные шелушащиеся пятна, поражение стоп и ногтей. Передаётся при контакте и через общие вещи. Диагноз ставит врач: похожие пятна бывают при экземе.": "Сақина тәрізді қабыршақтанған дақтар, табан мен тырнақтың зақымдануы. Жанасу және ортақ заттар арқылы жұғады. Диагнозды дәрігер қояды: ұқсас дақтар экземада да болады.", "при отёке губ или затруднённом дыхании — 103 или 112": "ерін ісінсе немесе тыныс қиындаса — 103 немесе 112", "Доброкачественные разрастания кожи, их вызывает вирус папилломы человека. Диагноз ставит врач.": "Терінің қатерсіз өсінділері, оларды адам папилломасы вирусы тудырады. Диагнозды дәрігер қояды.", "Витилиго": "Витилиго", "Потеря пигмента: чёткие белые пятна на коже. Не заразно и не опасно для жизни, но лечится у дерматолога.": "Пигменттің жоғалуы: теріде анық ақ дақтар. Жұқпалы емес және өмірге қауіпті емес, бірақ дерматологта емделеді.", "6 мм — ориентир: меланома бывает меньше. Правило ABCDE не распознаёт узловую (выпуклую, быстро растущую) и беспигментную (розовую) меланому, а также образования на ладонях, стопах и под ногтем. Важен и признак «гадкого утёнка»: родинка, не похожая на остальные.": "6 мм — бағдар ғана: меланома одан кіші де болады. ABCDE ережесі түйінді (дөңес, тез өсетін) және пигментсіз (қызғылт) меланоманы, сондай-ақ алақандағы, табандағы және тырнақ астындағы түзілімдерді анықтамайды. «Ұсқынсыз үйрек балапаны» белгісі де маңызды: басқаларына ұқсамайтын мең.", "Справочная информация общего характера. Диагноз ставит только врач.": "Жалпы сипаттағы анықтамалық ақпарат. Диагнозды тек дәрігер қояды.", "Меню": "Мәзір", "Интеллектуальная система скрининга и мониторинга кожных образований. Смартфон помогает заметить изменения кожи со временем и подсказывает, когда нужен визит к врачу.": "Тері түзілімдерін скринингтеу мен бақылаудың интеллектуалды жүйесі. Смартфон терінің уақыт өте өзгеруін байқауға көмектеседі және дәрігерге қашан бару керегін ескертеді.", "доля повторных обращений к специалисту (по ответам респондентов, предварительно)": "маманға қайта жүгінгендердің үлесі (респонденттердің жауаптары бойынша, алдын ала)", "Размер за последний период · 3 снимка": "Соңғы кезеңдегі өлшемі · 3 сурет", "рост заболеваемости меланомой в Казахстане за 2012–2022 годы, раком кожи — +24% (КазНИИОиР, 2024).": "2012–2022 жылдары Қазақстанда меланомамен сырқаттанушылықтың өсуі, тері обыры — +24% (ҚазОРҒЗИ, 2024).", "Модуль анамнеза учитывает факторы риска и разбирает описание жалоб по ключевым словам (упрощённый NLP). Тревожные симптомы сразу ведут к рекомендации врача.": "Анамнез модулі қауіп факторларын ескереді және шағымдар сипаттамасын кілт сөздер бойынша талдайды (жеңілдетілген NLP). Алаңдатарлық симптомдар бірден дәрігерге бару ұсынымына әкеледі.", "Что уже есть и чем мы отличаемся": "Не бар және біз немен ерекшеленеміз", "Отслеживать родинки по фото умеют и другие приложения. Наше отличие — в сочетании функций, которых нет вместе ни в одном из них, и в работе на русском и казахском языках.": "Меңдерді фото арқылы бақылауды басқа қосымшалар да біледі. Біздің ерекшелігіміз — олардың ешқайсысында бірге жоқ функциялардың үйлесімінде және орыс, қазақ тілдерінде жұмыс істеуінде.", "Функция": "Функция", "Автоматическая оценка снимка": "Суретті автоматты бағалау", "Да: алгоритм и панель дерматологов": "Иә: алгоритм және дерматологтар тобы", "Нет": "Жоқ", "Да: признаки A, B, C, D (в прототипе — эвристика)": "Иә: A, B, C, D белгілері (прототипте — эвристика)", "Факторы риска": "Қауіп факторлары", "Анкета профиля риска": "Қауіп профилінің сауалнамасы", "Калькулятор риска": "Қауіп калькуляторы", "Анамнез и «красные флаги», которые всегда ведут к врачу": "Анамнез және әрдайым дәрігерге апаратын «қызыл жалаушалар»", "Динамика": "Динамика", "Хранение фото для сравнения": "Салыстыру үшін фотоны сақтау", "Фото-обзор тела и напоминания": "Дененің фото-шолуы және еске салғыштар", "Количественное сравнение: размер, контур, цвет (ΔE)": "Сандық салыстыру: өлшемі, контуры, түсі (ΔE)", "Для врача": "Дәрігер үшін", "Можно поделиться фото": "Фотомен бөлісуге болады", "Готовая сводка: анамнез, снимки, изменения": "Дайын қорытынды: анамнез, суреттер, өзгерістер", "Языки": "Тілдер", "Английский и 8 европейских": "Ағылшын және 8 еуропалық тіл", "Английский": "Ағылшын", "Русский и казахский": "Орыс және қазақ", "Где обрабатывается снимок": "Сурет қайда өңделеді", "Отправляется в сервис": "Сервиске жіберіледі", "На устройстве": "Құрылғыда", "На устройстве, без сервера": "Құрылғыда, серверсіз", "По описаниям в App Store и публикациям разработчиков, ноябрь 2026. UMSkinCheck — приложение Мичиганского университета (2012).": "App Store сипаттамалары мен әзірлеушілердің жарияланымдары бойынша, 2026 жылғы қараша. UMSkinCheck — Мичиган университетінің қосымшасы (2012).", "Безопасность и данные": "Қауіпсіздік және деректер", "Ответственность прототипа": "Прототиптің жауапкершілігі", "Приложение для здоровья должно в первую очередь не навредить: не успокаивать зря и бережно обращаться с данными.": "Денсаулыққа арналған қосымша ең алдымен зиян келтірмеуі керек: бекер тыныштандырмауы және деректерге ұқыпты қарауы тиіс.", "Снимки остаются на устройстве": "Суреттер құрылғыда қалады", "Анализ идёт прямо в браузере или телефоне. Снимки и анамнез не отправляются на сервер и хранятся только у пользователя.": "Талдау тікелей браузерде немесе телефонда жүреді. Суреттер мен анамнез серверге жіберілмейді және тек пайдаланушыда сақталады.", "Персональные данные": "Дербес деректер", "Перед первым использованием пользователь даёт согласие. Обработка строится по Закону РК «О персональных данных и их защите» от 21 мая 2013 года № 94-V.": "Алғаш пайдаланар алдында пайдаланушы келісім береді. Өңдеу ҚР «Дербес деректер және оларды қорғау туралы» 2013 жылғы 21 мамырдағы № 94-V Заңына сәйкес жүргізіледі.", "Не диагноз и не медицинское изделие": "Диагноз емес және медициналық бұйым емес", "Прототип даёт рекомендацию, когда показаться врачу, и не ставит диагноз. Перед клиническим применением потребуется оценка его статуса как медицинского изделия по законодательству РК.": "Прототип дәрігерге қашан көріну керегі туралы ұсыным береді және диагноз қоймайды. Клиникалық қолданар алдында оның ҚР заңнамасы бойынша медициналық бұйым ретіндегі мәртебесін бағалау қажет.", "Защита от ложного успокоения": "Жалған тыныштандырудан қорғау", "Тревожные симптомы всегда ведут к врачу, зелёного «здоров» нет, а непригодный снимок не оценивается. Пороги прототипа консервативные и требуют клинической проверки.": "Алаңдатарлық симптомдар әрдайым дәрігерге апарады, жасыл «сау» жоқ, ал жарамсыз сурет бағаланбайды. Прототип шектері сақ және клиникалық тексеруді қажет етеді.", "Анкетирование 50 потенциальных пользователей (взрослые пациенты и родители). По ответам респондентов, доля повторных обращений к специалисту составила 30% до и 75% после использования приложения. Это предварительный результат самоотчёта.": "50 әлеуетті пайдаланушы (ересек пациенттер мен ата-аналар) арасында сауалнама. Респонденттердің жауаптары бойынша маманға қайта жүгінушілер үлесі қосымшаны пайдаланғанға дейін 30%, кейін 75% болды. Бұл өзін-өзі бағалаудың алдын ала нәтижесі.", "Диаграмма 1. Доля респондентов, сообщивших о повторных обращениях к специалисту (самоотчёт, n = 50).": "1-диаграмма. Маманға қайта жүгінгенін хабарлаған респонденттердің үлесі (өзін-өзі бағалау, n = 50).", "Респонденты отмечают, что видимая динамика и понятная рекомендация подталкивают вовремя обратиться к врачу.": "Респонденттер көрінетін динамика мен түсінікті ұсыным дәрігерге уақытында жүгінуге итермелейтінін атап өтеді.", "Следующий шаг": "Келесі қадам", "Проверить эффект строже: наблюдение 4–8 недель, подтверждённые визиты и контрольная группа без приложения.": "Әсерді қатаңырақ тексеру: 4–8 апта бақылау, расталған қаралулар және қосымшасыз бақылау тобы.", "Swift и SwiftUI для приложения, свёрточная нейросеть (CNN) для снимков, разбор анамнеза по ключевым словам. В веб-прототипе снимок оценивается алгоритмом признаков ABCD.": "Қосымша үшін Swift және SwiftUI, суреттер үшін конволюциялық нейрожелі (CNN), анамнезді кілт сөздер бойынша талдау. Веб-прототипте сурет ABCD белгілерінің алгоритмімен бағаланады.", "Анкетирование 50 респондентов через Google Forms (самоотчёт). Обучение и проверка модели на HAM10000 — следующий этап, блокнот готов.": "Google Forms арқылы 50 респондент арасында сауалнама (өзін-өзі бағалау). HAM10000-да модельді оқыту және тексеру — келесі кезең, блокнот дайын.", "Источники: Кодекс РК № 360-VI (2020); Закон РК № 94-V «О персональных данных и их защите» (2013); Концепция развития ИИ на 2024–2029 годы (2024); ВОЗ (2021); Тулеуова Д.А. и др., Онкология и радиология Казахстана (2024); МАИР ВОЗ, GLOBOCAN; American Cancer Society / SEER; Esteva et al., Nature (2017); Tschandl et al., Scientific Data (2018); ISIC Archive.": "Дереккөздер: ҚР № 360-VI Кодексі (2020); ҚР «Дербес деректер және оларды қорғау туралы» № 94-V Заңы (2013); Жасанды интеллектті дамытудың 2024–2029 жылдарға арналған тұжырымдамасы (2024); ДДСҰ (2021); Тулеуова Д.А. және т.б., Қазақстан онкологиясы және радиологиясы (2024); ДДСҰ ХОЗА, GLOBOCAN; American Cancer Society / SEER; Esteva et al., Nature (2017); Tschandl et al., Scientific Data (2018); ISIC Archive.", "снимков отправляется на сервер: анализ идёт на устройстве": "сурет серверге жіберілмейді: талдау құрылғыда жүреді", "Демо-пример · буква E": "Демо-мысал · E әрпі", "Размер в кадре за последний период · 3 снимка": "Соңғы кезеңдегі кадрдағы өлшемі · 3 сурет", "Мы сравнили DermoScan AI с двумя известными приложениями. Наше отличие — в сочетании функций и в работе на русском и казахском языках.": "Біз DermoScan AI-ды екі белгілі қосымшамен салыстырдық. Біздің ерекшелігіміз — функциялардың үйлесімі және орыс, қазақ тілдерінде жұмыс істеуі.", "Размер (в кадре)": "Өлшемі (кадрда)", "Размер считается в долях кадра: снимайте с того же расстояния, по полупрозрачному прошлому снимку. Монета рядом помогает врачу оценить масштаб.": "Өлшем кадр үлесімен есептеледі: бұрынғы жартылай мөлдір суретке қарап, сол қашықтықтан түсіріңіз. Қасындағы тиын дәрігерге масштабты бағалауға көмектеседі.", "Swift и SwiftUI для приложения, свёрточная нейросеть (CNN) для снимков, разбор анамнеза по ключевым словам. Целевая платформа — iOS; на сайте показан веб-прототип интерфейса, где снимок оценивается алгоритмом признаков ABCD.": "Қосымша үшін Swift және SwiftUI, суреттер үшін конволюциялық нейрожелі (CNN), анамнезді кілт сөздер бойынша талдау. Мақсатты платформа — iOS; сайтта интерфейстің веб-прототипі көрсетілген, онда сурет ABCD белгілерінің алгоритмімен бағаланады.", "Ограничения данных": "Деректер шектеулері", "HAM10000 — дерматоскопические снимки, в основном светлой кожи. Приложение снимает обычной камерой телефона, поэтому точность на HAM10000 не переносится на телефонные снимки напрямую. Следующий шаг — проверка на снимках смартфона (например, открытый набор PAD-UFES-20) и на коже разных типов.": "HAM10000 — негізінен ақшыл терінің дерматоскопиялық суреттері. Қосымша кәдімгі телефон камерасымен түсіреді, сондықтан HAM10000-дағы дәлдік телефон суреттеріне тікелей ауыспайды. Келесі қадам — смартфон суреттерінде (мысалы, ашық PAD-UFES-20 жинағы) және әртүрлі тері түрлерінде тексеру.", "Пороги прототипа (условные)": "Прототип шектері (шартты)", "Изменение считается заметным, если размер в кадре изменился на 20% и больше, совпадение контура ниже 75%, асимметрия выросла на 0,06 и больше или цвет изменился на ΔE ≥ 10. Два признака — «показать врачу», один — «наблюдать». Пороги подобраны вручную и требуют проверки врачом.": "Егер кадрдағы өлшем 20% және одан көп өзгерсе, контур сәйкестігі 75%-дан төмен болса, асимметрия 0,06 және одан көп өссе немесе түс ΔE ≥ 10-ға өзгерсе, өзгеріс елеулі деп есептеледі. Екі белгі — «дәрігерге көрсету», біреуі — «бақылау». Шектер қолмен таңдалған және дәрігердің тексеруін қажет етеді.", "Проект мобильного приложения на Swift / SwiftUI и его веб-прототип для первичного скрининга кожных образований.": "Swift / SwiftUI негізіндегі мобильді қосымша жобасы және тері түзілімдерін бастапқы скринингтеуге арналған оның веб-прототипі.", "смертей и новых случаев меланомы в год в Казахстане (оценка МАИР ВОЗ). Высокая доля смертей может указывать на позднее выявление.": "Қазақстанда жылына меланомадан болатын өлім мен жаңа жағдайлар (ДДСҰ ХОЗА бағалауы). Өлімнің жоғары үлесі кеш анықталуды көрсетуі мүмкін."};
+const RK={};for(const k in KK)RK[KK[k]]=k;
+const T=s=>(LANG==='kk'&&KK[s]!==undefined)?KK[s]:s;
+function srcOf(t){if(KK[t]!==undefined)return t;if(RK[t]!==undefined)return RK[t];return null;}
+const RU_TITLE=document.title;
+function translateTree(root){
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>{const p=n.parentElement;return(!p||p.closest('script,style'))?2:1;}});
+  const nodes=[];while(w.nextNode())nodes.push(w.currentNode);
+  nodes.forEach(n=>{const v=n.nodeValue,t=v.trim().replace(/\s+/g,' ');if(!t)return;
+    const ru=n.__ru||srcOf(t);if(!ru)return;n.__ru=ru;
+    n.nodeValue=v.match(/^\s*/)[0]+T(ru)+v.match(/\s*$/)[0];});
+  root.querySelectorAll('[placeholder],[aria-label],[alt]').forEach(e=>['placeholder','aria-label','alt'].forEach(a=>{
+    const v=e.getAttribute(a);if(!v)return;const ru=e.getAttribute('data-ru-'+a)||srcOf(v);if(!ru)return;
+    e.setAttribute('data-ru-'+a,ru);e.setAttribute(a,T(ru));}));
+}
+function ruText(b){const n=b.firstChild;return(n&&n.__ru)||b.textContent.trim();}
+
+/* ---------- навигация по экранам ---------- */
+function go(name){
+  if(name!=='scan'){clearInterval(scanTimer);stopCam();}
+  stopEvolution();
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.dataset.s===name));
+  const scr=document.querySelector('.screen.on');if(scr)scr.scrollTop=0;
+  if(name==='scan') resetScan();
+  if(name==='pass') renderPassport();
+  if(name==='lesion') renderLesion();
+  if(name==='home') renderHome();
+  if(name==='anam') setAnamLabels();
+}
+function setAnamLabels(){
+  $('anamStep').textContent=T(afterAnam?'Шаг 1 из 2':'Профиль');
+  $('anamBtn').textContent=T(afterAnam?'Перейти к сканированию':'Сохранить');
+}
+function startFlow(target){
+  scanTarget=(target===undefined||target===null)?'new':target;
+  if(!anamDone){afterAnam=true;go('anam');}
+  else go('scan');
+}
+function saveAnam(){
+  anamDone=true;
+  if(afterAnam){afterAnam=false;go('scan');}
+  else{
+    $('anamBtn').textContent=T('Сохранено ✓');
+    setTimeout(()=>{$('anamBtn').textContent=T('Сохранить');},1400);
+  }
+}
+
+/* ---------- контекстный модуль (упрощённая демо-имитация NLP) ---------- */
+const NLP_RULES=[
+  {k:'изменение размера',red:true,t:w=>/^(раст|рос|увелич|вырос|больш|крупн|өс|үлкей)/.test(w)},
+  {k:'изменение цвета',red:true,t:w=>/^(цвет|темн|почерн|потемн|покрасн|түс|қарай|қызар)/.test(w)&&!/^цвето/.test(w)},
+  {k:'кровоточивость',red:true,t:w=>/^(кров|мокн|язв|қана|қансыр)/.test(w)||w==='қан'},
+  {k:'зуд',red:false,t:w=>/^(чеш|зуд|қыши|қышы)/.test(w)},
+  {k:'изменение формы или границ',red:false,t:w=>/^(форм|кра[йяе]|границ|неровн|пішін|шекар|жиег)/.test(w)},
+  {k:'шелушение',red:false,t:w=>/^(шелуш|корк|сух|қабыршақ|құрғақ)/.test(w)},
+  {k:'боль или жжение',red:false,t:w=>/^(болит|болят|болела|болело|боль|боли|болью)$/.test(w)||/^(болезн|жж|ауыр|күйд)/.test(w)}
+];
+function readText(t){
+  const low=(t||'').toLocaleLowerCase('ru');
+  const ws=low.match(/[a-zа-яёәғқңөұүһі]+/g)||[];
+  const found=new Map();
+  ws.forEach((w,i)=>{
+    const prev=ws[i-1];
+    if(prev==='не'||prev==='нет'||prev==='без') return;
+    NLP_RULES.forEach(r=>{if(r.t(w))found.set(r.k,r.red);});
+  });
+  if(/не\s*заж|незажив|жазылма/.test(low)) found.set('не заживает',true);
+  return [...found].map(([k,red])=>({k,red}));
+}
+document.querySelectorAll('.chips .opt').forEach(b=>{b.setAttribute('aria-pressed','false');b.addEventListener('click',()=>{b.classList.toggle('on');b.setAttribute('aria-pressed',b.classList.contains('on'));});});
+document.querySelectorAll('.field').forEach((f,i)=>{const ch=f.querySelector('.chips'),lb=f.querySelector('label');if(ch&&lb){lb.id='lbl'+i;ch.setAttribute('role','group');ch.setAttribute('aria-labelledby','lbl'+i);}});
+function picked(g){return [...document.querySelectorAll('.chips[data-group="'+g+'"] .opt.on')];}
+function sel(id){const e=$(id);return {w:+e.value||0,t:e.options[e.selectedIndex].text};}
+function contextRisk(areaName){
+  const flags=readText($('aText').value);
+  const chips=['feat','sym','sun','fam','own'].flatMap(picked);
+  const areaW=AREA_W[areaName]||0;
+  const raw=sel('aAge').w+sel('aSkin').w+sel('aMoles').w+areaW+chips.reduce((a,b)=>a+(+b.dataset.w||0),0)+flags.filter(f=>!f.red).length;
+  const red=[...picked('sym').filter(b=>b.dataset.red).map(ruText),...flags.filter(f=>f.red).map(f=>f.k)];
+  const other=[];
+  if(sel('aMoles').w===2) other.push('больше 50 родинок');
+  if(areaW) other.push(areaName);
+  ['feat','sym','sun','own'].forEach(g=>picked(g).forEach(b=>{if(!b.dataset.red)other.push(ruText(b));}));
+  return {raw,norm:Math.min(raw/10,1),level:raw>=6?'высокий':raw>=3?'умеренный':'низкий',
+    flags:flags.filter(f=>!f.red).map(f=>f.k),other,fam:picked('fam').map(ruText),red:[...new Set(red)]};
+}
+
+/* ---------- источники снимка: камера, фото, пример ---------- */
+let stream=null,camBusy=false;
+function lesionById(id){return lesions.find(l=>l.id===id);}
+function fillTargets(){
+  const s=$('tgtSel');
+  s.innerHTML='<option value="new">'+esc(T('Новое образование'))+'</option>'+
+    lesions.map(l=>`<option value="${l.id}">${esc(T(l.area))} · ${esc(T('снимков'))}: ${l.scans.length}</option>`).join('');
+  s.value=lesionById(scanTarget)?scanTarget:'new';
+  onTargetChange();
+}
+function onTargetChange(){
+  scanTarget=$('tgtSel').value;
+  const l=lesionById(scanTarget);
+  $('areaField').style.display=l?'none':'block';
+  const g=$('ghost');
+  if(l){const last=l.scans[l.scans.length-1];g.src=last.frame;g.style.display='block';$('ghostCtl').style.display='flex';g.style.opacity=$('ghostOp').value/100;
+    $('progTxt').textContent=T('Совместите образование с прошлым снимком');}
+  else{g.removeAttribute('src');g.style.display='none';$('ghostCtl').style.display='none';$('progTxt').textContent=T('Выберите источник снимка');}
+}
+$('tgtSel').addEventListener('change',onTargetChange);
+$('ghostOp').addEventListener('input',e=>{$('ghost').style.opacity=e.target.value/100;});
+function resetScan(){
+  stopCam();clearInterval(scanTimer);
+  $('resBox').style.display='none';$('resBox').innerHTML='';$('qBox').innerHTML='';
+  $('progWrap').style.display='none';$('srcRow').style.display='flex';$('exRow').style.display='none';
+  $('pickRow').style.display='block';
+  $('scanHint').style.display='block';
+  $('shotCv').style.display='none';$('cam').style.display='none';
+  $('ring').style.display='block';$('ring').style.animationPlayState='paused';
+  $('dot').style.display='block';$('cross').style.display='block';
+  $('camBtn').textContent=T('Камера');
+  fillTargets();
+}
+async function camAction(){
+  if(camBusy) return;
+  if(stream){captureFrame();return;}
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){camFail();return;}
+  camBusy=true;
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
+    const v=$('cam');v.srcObject=stream;v.style.display='block';await v.play();
+    $('dot').style.display='none';$('ring').style.animationPlayState='running';
+    $('camBtn').textContent=T('Снимок');$('camBtn').classList.add('on');
+    $('progTxt').textContent=T('Наведите камеру на образование');
+  }catch(e){stopCam();camFail();}
+  finally{camBusy=false;}
+}
+function camFail(){$('progTxt').textContent=T('Открываем камеру телефона. Если она не открылась, нажмите «Фото».');try{$('camIn').click();}catch(e){}}
+function stopCam(){
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+  const v=$('cam');if(v){v.srcObject=null;v.style.display='none';}
+  const b=$('camBtn');if(b){b.textContent=T('Камера');b.classList.remove('on');}
+}
+function captureFrame(){
+  const v=$('cam'),c=document.createElement('canvas');
+  c.width=v.videoWidth||640;c.height=v.videoHeight||480;
+  c.getContext('2d').drawImage(v,0,0,c.width,c.height);
+  processImage(c,'камера',null);
+}
+function onPick(e){
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  const url=URL.createObjectURL(f),img=new Image();
+  img.onload=()=>{const c=document.createElement('canvas');const k=Math.min(1,1024/Math.max(img.width,img.height));
+    c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    URL.revokeObjectURL(url);processImage(c,'фото',null);};
+  img.onerror=()=>{URL.revokeObjectURL(url);$('progTxt').textContent=T('Не удалось открыть файл. Выберите фото в формате JPG или PNG.');};
+  img.src=url;e.target.value='';
+}
+$('fileIn').addEventListener('change',onPick);
+$('camIn').addEventListener('change',onPick);
+function exampleAction(){
+  const l=lesionById(scanTarget);
+  if(l&&l.demo){runExample(l.demo.irregular);return;}
+  $('exRow').style.display=$('exRow').style.display==='none'?'flex':'none';
+}
+function runExample(irregular){
+  const l=lesionById(scanTarget);
+  let meta;
+  if(l&&l.demo) meta={seed:l.demo.seed,irregular:l.demo.irregular,step:l.scans.length};
+  else meta={seed:irregular?202:101,irregular,step:0};
+  processImage(makeSample(meta.seed,meta.irregular,meta.step),'пример',meta);
+}
+
+/* ---------- генератор примеров (повторяемый: одно образование — один seed) ---------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function makeSample(seed,irregular,step){
+  const rnd=mulberry32(seed),noise=mulberry32(seed*31+step*7919+1);
+  const W=480,H=360,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  const tones=[[226,188,160],[214,172,142],[198,152,122]];
+  const tone=tones[Math.floor(rnd()*tones.length)];
+  const g=x.createRadialGradient(W/2,H/2,40,W/2,H/2,330);
+  g.addColorStop(0,`rgb(${tone})`);g.addColorStop(1,`rgb(${tone.map(v=>v-28)})`);
+  x.fillStyle=g;x.fillRect(0,0,W,H);
+  for(let i=0;i<3000;i++){x.fillStyle=`rgba(${noise()<.5?'255,255,255':'90,60,40'},${noise()*.07})`;x.fillRect(noise()*W,noise()*H,2,2);}
+  const grow=irregular?1+.22*step:1+.01*step;
+  const cx=W/2+(rnd()-.5)*30,cy=H/2+(rnd()-.5)*24,R=(irregular?40:34)*grow;
+  const n=72,ph=rnd()*6.283,ph2=rnd()*6.283;
+  const k1=irregular?.26+.06*Math.min(step,3):.02;
+  const ex=irregular?.9:.95;
+  const jit=Array.from({length:n},()=>rnd()-.5);
+  const pts=[];
+  for(let i=0;i<n;i++){
+    const a=i/n*6.283;
+    const r=R*(1+k1*Math.sin(2*a+ph)+(irregular?.7*k1*Math.sin(5*a+ph2)+.35*k1*Math.sin(11*a+ph):0)+jit[i]*(irregular?k1*.5:.02));
+    pts.push([cx+r*Math.cos(a)*ex,cy+r*Math.sin(a)]);
+  }
+  x.save();x.beginPath();pts.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.closePath();
+  const base=irregular?[78,46,34]:[118,80,58];
+  x.fillStyle=`rgb(${base})`;x.fill();x.clip();
+  if(irregular){
+    const cols=['28,18,16','140,64,52','96,96,118','160,90,70','18,12,12','60,40,70'];
+    const blot=Array.from({length:8},()=>[rnd(),rnd(),rnd(),rnd()]);
+    const k=4+Math.min(step,4);
+    for(let i=0;i<k;i++){const b=blot[i%8];
+      x.fillStyle=`rgba(${cols[Math.floor(b[0]*cols.length)]},.8)`;
+      x.beginPath();x.arc(cx+(b[1]-.5)*R*1.4,cy+(b[2]-.5)*R*1.4,R*(.22+b[3]*.3),0,6.283);x.fill();}
+  }else{
+    const rg=x.createRadialGradient(cx,cy,2,cx,cy,R*1.1);
+    rg.addColorStop(0,`rgba(${base.map(v=>v-22)},.9)`);rg.addColorStop(1,`rgba(${base},0)`);
+    x.fillStyle=rg;x.fillRect(0,0,W,H);
+  }
+  x.restore();
+  return c;
+}
+
+/* ---------- анализ изображения: качество + признаки ABCD ---------- */
+const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+function rgb2lab(r,g,b){
+  const f=v=>{v/=255;return v>.04045?Math.pow((v+.055)/1.055,2.4):v/12.92;};
+  const R=f(r),G=f(g),B=f(b);
+  let X=(R*.4124+G*.3576+B*.1805)/.95047,Y=R*.2126+G*.7152+B*.0722,Z=(R*.0193+G*.1192+B*.9505)/1.08883;
+  const h=t=>t>.008856?Math.cbrt(t):7.787*t+16/116;
+  X=h(X);Y=h(Y);Z=h(Z);
+  return [116*Y-16,500*(X-Y),200*(Y-Z)];
+}
+function analyze(src){
+  const N=200,k=N/Math.max(src.width,src.height);
+  const w=Math.max(16,Math.round(src.width*k)),h=Math.max(16,Math.round(src.height*k));
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(src,0,0,w,h);
+  const d=x.getImageData(0,0,w,h).data,P=w*h,g=new Float32Array(P);
+  let sum=0;for(let i=0;i<P;i++){g[i]=.299*d[i*4]+.587*d[i*4+1]+.114*d[i*4+2];sum+=g[i];}
+  const bright=sum/P;
+  let m=0,m2=0,n=0;
+  for(let yy=1;yy<h-1;yy++)for(let xx=1;xx<w-1;xx++){const i=yy*w+xx;const L=4*g[i]-g[i-1]-g[i+1]-g[i-w]-g[i+w];m+=L;m2+=L*L;n++;}
+  const sharp=n?m2/n-(m/n)*(m/n):0;
+  const quality={bright:Math.round(bright),sharp:Math.round(sharp),
+    light:bright<60?'темно':bright>215?'пересвет':'норма',focus:sharp<40?'размыто':'резко'};
+  quality.ok=quality.light==='норма'&&quality.focus==='резко';
+  const fc=document.createElement('canvas');fc.width=w*2;fc.height=h*2;fc.getContext('2d').drawImage(src,0,0,fc.width,fc.height);
+  const frame=fc.toDataURL('image/jpeg',.8);
+
+  const hist=new Array(256).fill(0);for(let i=0;i<P;i++)hist[g[i]|0]++;
+  let sAll=0;for(let t=0;t<256;t++)sAll+=t*hist[t];
+  let sB=0,wB=0,best=-1,thr=128;
+  for(let t=0;t<256;t++){wB+=hist[t];if(!wB)continue;const wF=P-wB;if(!wF)break;sB+=t*hist[t];
+    const mB=sB/wB,mF=(sAll-sB)/wF,bt=wB*wF*(mB-mF)*(mB-mF);if(bt>best){best=bt;thr=t;}}
+  const dark=new Uint8Array(P);for(let i=0;i<P;i++)dark[i]=g[i]<thr?1:0;
+  let seed=-1,mn=1e9;
+  for(let yy=Math.floor(h*.2);yy<h*.8;yy++)for(let xx=Math.floor(w*.2);xx<w*.8;xx++){const i=yy*w+xx;if(dark[i]&&g[i]<mn){mn=g[i];seed=i;}}
+  if(seed<0) return {found:false,quality,w,h,frame};
+  const mask=new Uint8Array(P),stack=[seed];mask[seed]=1;
+  let area=0,sx=0,sy=0,x0=w,x1=0,y0=h,y1=0;
+  while(stack.length){
+    const i=stack.pop();area++;const px=i%w,py=(i/w)|0;sx+=px;sy+=py;
+    if(px<x0)x0=px;if(px>x1)x1=px;if(py<y0)y0=py;if(py>y1)y1=py;
+    if(px>0&&dark[i-1]&&!mask[i-1]){mask[i-1]=1;stack.push(i-1);}
+    if(px<w-1&&dark[i+1]&&!mask[i+1]){mask[i+1]=1;stack.push(i+1);}
+    if(py>0&&dark[i-w]&&!mask[i-w]){mask[i-w]=1;stack.push(i-w);}
+    if(py<h-1&&dark[i+w]&&!mask[i+w]){mask[i+w]=1;stack.push(i+w);}
+  }
+  const frac=area/P;
+  if(frac<.004||frac>.6) return {found:false,quality,w,h,frame};
+  const cx=sx/area,cy=sy/area;
+  let xv=0,xh=0,per=0,sr=0,sg=0,sb=0,sr2=0,sg2=0,sb2=0;
+  const edge=[];
+  for(let i=0;i<P;i++){
+    if(!mask[i])continue;
+    const px=i%w,py=(i/w)|0;
+    const mx=Math.round(2*cx-px),my=Math.round(2*cy-py);
+    if(mx<0||mx>=w||!mask[py*w+mx])xv++;
+    if(my<0||my>=h||!mask[my*w+px])xh++;
+    const isEdge=px===0||py===0||px===w-1||py===h-1||!mask[i-1]||!mask[i+1]||!mask[i-w]||!mask[i+w];
+    if(isEdge){per++;edge.push(i);}
+    const r=d[i*4],gg=d[i*4+1],b=d[i*4+2];
+    sr+=r;sg+=gg;sb+=b;sr2+=r*r;sg2+=gg*gg;sb2+=b*b;
+  }
+  const A=(xv+xh)/(2*area);
+  const B=per/(2*Math.sqrt(Math.PI*area));
+  const sd=(s,s2)=>Math.sqrt(Math.max(0,s2/area-(s/area)*(s/area)));
+  const C=(sd(sr,sr2)+sd(sg,sg2)+sd(sb,sb2))/3;
+  const D=Math.sqrt(frac);
+  const lab=rgb2lab(sr/area,sg/area,sb/area);
+  const nA=clamp((A-.05)/.3),nB=clamp((B-.95)/.6),nC=clamp((C-8)/22),nD=clamp((D-.15)/.35);
+  const risk=clamp(.35*nA+.3*nB+.25*nC+.1*nD);
+  const size=Math.max(x1-x0,y1-y0)*1.8+6;
+  const crop={x:cx-size/2,y:cy-size/2,s:size};
+  return {found:true,quality,w,h,mask,edge,cx,cy,frac,A,B,C,D,nA,nB,nC,nD,risk,lab,crop,frame};
+}
+function encodeRLE(m){const out=[];let v=0,run=0;for(let i=0;i<m.length;i++){if(m[i]===v)run++;else{out.push(run);run=1;v^=1;}}out.push(run);return out.join(',');}
+function decodeRLE(s,P){const m=new Uint8Array(P);let i=0,v=0;s.split(',').forEach(r=>{const n=+r;if(v)m.fill(1,i,i+n);i+=n;v^=1;});return m;}
+function makeThumb(src,an){
+  const t=document.createElement('canvas');t.width=t.height=160;const x=t.getContext('2d');
+  const k=src.width/an.w;
+  x.fillStyle='#d8c0a8';x.fillRect(0,0,160,160);
+  x.drawImage(src,an.crop.x*k,an.crop.y*k,an.crop.s*k,an.crop.s*k,0,0,160,160);
+  return t.toDataURL('image/jpeg',.82);
+}
+
+/* ---------- отрисовка снимка и контура ---------- */
+function drawShot(src,an){
+  const cv=$('shotCv'),box=$('scanbox');
+  const W=box.clientWidth||288,H=box.clientHeight||260;
+  cv.width=W*2;cv.height=H*2;
+  const x=cv.getContext('2d');
+  const s=Math.max(cv.width/src.width,cv.height/src.height);
+  const dw=src.width*s,dh=src.height*s,ox=(cv.width-dw)/2,oy=(cv.height-dh)/2;
+  x.drawImage(src,ox,oy,dw,dh);
+  cv.style.display='block';
+  if(an&&an.found){
+    const px=dw/an.w;
+    x.fillStyle='rgba(111,230,234,.95)';
+    an.edge.forEach(i=>{const ex=i%an.w,ey=(i/an.w)|0;x.fillRect(ox+ex*px,oy+ey*px,Math.max(2,px*.9),Math.max(2,px*.9));});
+  }
+}
+
+/* ---------- сравнение двух снимков одного образования (буква E) ---------- */
+function compareScans(a,b){
+  if(!a||!b||a.w!==b.w||a.h!==b.h) return null;
+  const P=a.w*a.h,ma=decodeRLE(a.mask,P),mb=decodeRLE(b.mask,P);
+  const dx=Math.round(a.cx-b.cx),dy=Math.round(a.cy-b.cy);
+  const mbs=new Uint8Array(P);
+  for(let i=0;i<P;i++){if(!mb[i])continue;const x=i%b.w+dx,y=((i/b.w)|0)+dy;if(x>=0&&x<b.w&&y>=0&&y<b.h)mbs[y*b.w+x]=1;}
+  let inter=0,uni=0;for(let i=0;i<P;i++){if(ma[i]&&mbs[i])inter++;if(ma[i]||mbs[i])uni++;}
+  const iou=uni?inter/uni:0;
+  const sizeCh=(b.m.frac-a.m.frac)/a.m.frac;
+  const dA=b.m.A-a.m.A;
+  const dE=Math.hypot(b.m.lab[0]-a.m.lab[0],b.m.lab[1]-a.m.lab[1],b.m.lab[2]-a.m.lab[2]);
+  const reliable=Math.abs(b.m.bright-a.m.bright)/Math.max(1,a.m.bright)<=.2;
+  const hits=[Math.abs(sizeCh)>=.2,iou<.75,dA>=.06,dE>=10].filter(Boolean).length;
+  const level=!reliable?'na':hits>=2?'bad':hits===1?'mid':'ok';
+  return {iou,sizeCh,dA,dE,hits,reliable,level,dx,dy,ma,mb};
+}
+const CMP_TXT={ok:'Заметных изменений не выявлено',mid:'Есть изменения: повторите снимок через 2–4 недели',bad:'Образование меняется: это повод показаться дерматологу',na:'Условия съёмки отличаются: сравнение неточное, переснимите при том же свете'};
+function fmtPct(v){const p=Math.round(v*100);return (p>0?'+':'')+p+'%';}
+function cmpRows(c){
+  const r=(name,val,warn)=>`<div class="crow${warn?' warn':''}"><span>${esc(T(name))}</span><b>${val}</b></div>`;
+  return r('Размер (в кадре)',fmtPct(c.sizeCh),Math.abs(c.sizeCh)>=.2)+
+    r('Совпадение контура',Math.round(c.iou*100)+'%',c.iou<.75)+
+    r('Асимметрия',(c.dA>=0?'+':'')+c.dA.toFixed(2).replace('.',','),c.dA>=.06)+
+    r('Цвет (ΔE)',Math.round(c.dE)+(c.dE>=10?' · '+T('изменился'):' · '+T('без заметных изменений')),c.dE>=10);
+}
+
+/* ---------- сканирование ---------- */
+let pending=null,lastR=null;
+function processImage(src,source,demo){
+  stopCam();
+  $('pickRow').style.display='none';$('exRow').style.display='none';
+  $('ghost').style.display='none';$('ghostCtl').style.display='none';
+  drawShot(src,null);
+  $('dot').style.display='none';$('cross').style.display='none';
+  pending={src,an:analyze(src),source,demo,target:scanTarget,area:$('aArea').value};
+  startScan();
+}
+function startScan(){
+  const bar=$('progBar'),txt=$('progTxt');
+  $('resBox').style.display='none';$('qBox').innerHTML='';
+  $('srcRow').style.display='none';$('progWrap').style.display='block';
+  $('ring').style.display='block';$('ring').style.animationPlayState='running';
+  bar.style.width='0%';txt.textContent=T('Анализирую…');
+  let p=0;clearInterval(scanTimer);
+  scanTimer=setInterval(()=>{
+    p+=5;bar.style.width=Math.min(p,100)+'%';
+    if(p===25) txt.textContent=T('Препроцессинг: свет и резкость…');
+    if(p===50) txt.textContent=T('Выделяю границы образования…');
+    if(p===75) txt.textContent=T('Асимметрия, границы, цвет, размер…');
+    if(p===90) txt.textContent=T('Сопоставляю с анамнезом и прошлыми снимками…');
+    if(p>=100){clearInterval(scanTimer);txt.textContent=T('Готово');showResult();}
+  },80);
+}
+function showResult(){
+  const {src,an,source,demo,target}=pending;
+  $('ring').style.display='none';
+  drawShot(src,an);
+  if(!an.quality.ok){lastR={kind:'bad_quality',q:an.quality};renderResult(lastR);return;}
+  if(!an.found){lastR={kind:'not_found',q:an.quality};renderResult(lastR);return;}
+  let les=lesionById(target);
+  const area=les?les.area:pending.area;
+  const ctx=contextRisk(area);
+  const scan={ts:Date.now(),w:an.w,h:an.h,cx:an.cx,cy:an.cy,mask:encodeRLE(an.mask),
+    m:{A:an.A,B:an.B,C:an.C,D:an.D,frac:an.frac,nA:an.nA,nB:an.nB,nC:an.nC,nD:an.nD,risk:an.risk,lab:an.lab,bright:an.quality.bright},
+    thumb:makeThumb(src,an),frame:an.frame,crop:an.crop,source};
+  const prev=les?les.scans[les.scans.length-1]:null;
+  const cmp=prev?compareScans(prev,scan):null;
+  const total=clamp(.7*an.risk+.3*ctx.norm);
+  let cls=(total>=.45||an.risk>=.6)?'bad':total>=.22?'mid':'ok';
+  if(cmp&&cmp.level==='mid'&&cls==='ok') cls='mid';
+  if(cmp&&cmp.level==='bad') cls='bad';
+  if(ctx.red.length) cls='bad';
+  scan.cls=cls;scan.red=ctx.red;
+  if(!les){
+    les={id:'L'+Date.now().toString(36),area,created:scan.ts,scans:[]};
+    if(demo) les.demo={seed:demo.seed,irregular:demo.irregular};
+    lesions.push(les);
+  }
+  les.scans.push(scan);saveStore();
+  curLesion=les.id;
+  lastR={kind:'ok',cls,ctx,an:scan.m,cmp:cmp?{iou:cmp.iou,sizeCh:cmp.sizeCh,dA:cmp.dA,dE:cmp.dE,level:cmp.level}:null,
+    prevDate:prev?prev.ts:null,area,n:les.scans.length,teen:$('aAge').selectedIndex===0,demo:!!demo,q:an.quality};
+  renderResult(lastR);
+}
+function word(v){return v>.6?'тревожно':v>.35?'внимание':'спокойно';}
+function fx(label,hint,v){
+  return `<div class="fx"><span>${esc(T(label))}<small>${esc(T(hint))}</small></span><i><b style="width:${Math.max(6,Math.round(v*100))}%;background:${v>.6?'var(--bad)':v>.35?'var(--mid)':'var(--ok)'}"></b></i><em>${esc(T(word(v)))}</em></div>`;
+}
+function renderResult(R){
+  const q=R.q;
+  $('qBox').innerHTML=q?`<div class="qual ${q.ok?'':'warn'}"><b>${T('Качество снимка:')}</b> ${T('освещённость')} — ${T(q.light)}, ${T('резкость')} — ${T(q.focus)}.</div>`:'';
+  const again=`<button class="btn small" style="margin-top:10px" onclick="resetScan()">${T('Переснять')}</button>`;
+  if(R.kind==='bad_quality'){
+    $('resBox').innerHTML=`<div class="res" style="background:${COLOR.na}"><b>${T('Снимок непригоден для оценки')}</b>
+      <div class="ressub">${T('Снимайте при дневном свете, без вспышки, держите телефон неподвижно.')}</div></div>${again}`;
+  }else if(R.kind==='not_found'){
+    $('resBox').innerHTML=`<div class="res" style="background:${COLOR.na}"><b>${T('Образование не найдено')}</b>
+      <div class="ressub">${T('Поднесите камеру ближе, чтобы образование было в центре сетки и занимало заметную часть кадра. Фон должен быть ровным.')}</div></div>${again}`;
+  }else{
+    const c=R.ctx,a=R.an,lc=x=>T(x).toLocaleLowerCase(LANG==='kk'?'kk':'ru');
+    const redBox=c.red.length?`<div class="redflag"><b>${T('Тревожные симптомы')}:</b> ${c.red.map(lc).join(', ')}. ${T('При таких симптомах нужен осмотр врача, даже если снимок выглядит спокойно.')}</div>`:'';
+    const cmpBox=R.cmp?`<div class="cmpres"><div class="cmphead">${T('Буква E: сравнение с')} ${fmtDate(R.prevDate)}</div>${cmpRows(R.cmp)}
+      <div class="cmpverdict" style="color:${COLOR[R.cmp.level]}">${T(CMP_TXT[R.cmp.level])}</div></div>`
+      :`<div class="cmpres"><div class="cmphead">${T('Буква E: динамика')}</div><div style="font-size:12.5px;color:#3a4d66">${T('Это первый снимок образования. Повторите его через 1–3 месяца, и приложение покажет, как оно изменилось.')}</div></div>`;
+    const ctxLines=(c.other.length?`<br>${T('Учтено')}: ${c.other.map(lc).join(', ')}`:'')
+      +(c.fam.length?`<br>${T('У родственников')}: ${c.fam.map(lc).join(', ')}`:'')
+      +(c.flags.length?`<br>${T('В описании')}: ${c.flags.map(lc).join(', ')}`:'');
+    $('resBox').innerHTML=`<div class="res" style="background:${COLOR[R.cls]}">
+        <div class="resk">${T('Итог · это не диагноз')}</div>
+        <b>${T(STATUS[R.cls])}</b><div class="ressub">${T(ADVICE[R.cls])}</div></div>
+      ${redBox}${cmpBox}
+      <div class="layers">
+        <div class="fxhead"><span>${T('Что видно на снимке')}</span><span></span></div>
+        ${fx('A · асимметрия','похожи ли половинки',a.nA)}
+        ${fx('B · границы','ровный ли край',a.nB)}
+        ${fx('C · цвет','сколько оттенков',a.nC)}
+        ${fx('D · размер','доля кадра, не мм',a.nD)}
+        <div><span>${T('Анамнез')}</span><span>${T('Риск')}: ${T(c.level)}${ctxLines}</span></div>
+      </div>
+      <div class="always">${T('Если образование растёт, меняется, кровоточит или не заживает 4 недели, покажите его дерматологу, даже если приложение не нашло признаков риска.')}</div>
+      ${R.teen?'<div class="hint">'+T('Пользователь младше 18 лет: результат стоит обсудить с родителями и врачом.')+'</div>':''}
+      <div class="hint">${T('Сохранено в паспорт')}: ${esc(T(R.area))} · ${T('снимок')} ${R.n}${R.demo?' · '+T('пример'):''}</div>
+      <div class="rowbtns"><button class="btn small" onclick="resetScan()">${T('Новый скан')}</button><button class="btn small ghostbtn" onclick="go('lesion')">${T('Открыть паспорт')}</button></div>`;
+  }
+  $('scanHint').style.display='none';
+  $('resBox').style.display='block';
+}
+
+/* ---------- главная ---------- */
+function allScans(){return lesions.flatMap(l=>l.scans.map(s=>({s,l})));}
+function renderHome(){
+  const all=allScans().sort((x,y)=>y.s.ts-x.s.ts);
+  const card=$('homeStatus');
+  if(!all.length){card.className='statuscard none';$('homeStatusTxt').textContent=T('Сканов пока нет');$('homeStatusSub').textContent=T('Начните с кнопки «Сканирование»');}
+  else{const {s,l}=all[0];card.className='statuscard '+s.cls;$('homeStatusTxt').textContent=T(STATUS[s.cls]);
+    $('homeStatusSub').textContent=T('Последний снимок:')+' '+fmtDate(s.ts)+' · '+T(l.area);}
+  $('homePass').textContent=T('Цифровой паспорт кожи')+' · '+T('образований')+': '+lesions.length;
+}
+
+/* ---------- цифровой паспорт ---------- */
+function renderPassport(){
+  const n=lesions.length,m=allScans().length;
+  $('passSum').textContent=n?`${T('образований')}: ${n} · ${T('снимков')}: ${m}`:'';
+  $('passEmpty').style.display=n?'none':'block';
+  $('exBtn').style.display=lesions.some(l=>l.example)?'none':'inline-block';
+  $('sumBtn').style.display=n?'inline-block':'none';
+  $('lesList').innerHTML=lesions.slice().reverse().map(l=>{
+    const s=l.scans[l.scans.length-1];
+    return `<button type="button" class="lesItem" onclick="openLesion('${l.id}')"><img src="${s.thumb}" alt=""><span class="lesTxt"><b>${esc(T(l.area))}${l.example?' · '+T('пример'):''}</b><small>${T('снимков')}: ${l.scans.length} · ${fmtDate(s.ts)}</small></span><span class="dotc" style="background:${COLOR[s.cls]}" title="${esc(T(STATUS[s.cls]))}"></span></button>`;
+  }).join('');
+}
+function openLesion(id){curLesion=id;go('lesion');}
+let evoTimer=null;
+function stopEvolution(){if(evoTimer){clearInterval(evoTimer);evoTimer=null;}}
+function renderLesion(){
+  const l=lesionById(curLesion);if(!l){go('pass');return;}
+  const s=l.scans[l.scans.length-1];
+  $('lesTitle').textContent=T(l.area)+(l.example?' · '+T('пример'):'');
+  $('lesStatus').innerHTML=`<div class="statuscard ${s.cls}"><div style="font-size:12px;opacity:.9">${T('Последний снимок')} · ${fmtDate(s.ts)}</div><div style="font-size:17px;font-weight:800;line-height:1.25">${T(STATUS[s.cls])}</div><div style="font-size:12px;opacity:.95">${T(ADVICE[s.cls])}</div></div>`;
+  const n=l.scans.length;
+  if(n>=2){
+    const a=l.scans[n-2],b=l.scans[n-1],c=compareScans(a,b);
+    $('cmpBox').innerHTML=`<div class="cmpres"><div class="cmphead">${T('Что изменилось')}: ${fmtDate(a.ts)} → ${fmtDate(b.ts)}</div>
+      <div class="ba"><canvas id="baCv" width="320" height="320" aria-label="${esc(T('Было и стало'))}"></canvas>
+      <label class="sr" for="baR">${T('Было / стало')}</label><input type="range" id="baR" min="0" max="100" value="50">
+      <div class="balbl"><span>${T('Было')}</span><span>${T('Стало')}</span></div></div>
+      ${c?cmpRows(c):''}<div class="cmpverdict" style="color:${COLOR[c?c.level:'na']}">${T(CMP_TXT[c?c.level:'na'])}</div><div class="hint" style="margin-top:6px">${T('Размер считается в долях кадра: снимайте с того же расстояния, по полупрозрачному прошлому снимку. Монета рядом помогает врачу оценить масштаб.')}</div>
+      <div class="legend"><i style="background:#2F6FE0"></i>${T('прежний контур')} <i style="background:#11B5B9"></i>${T('новый контур')}</div></div>`;
+    drawBA(a,b,c,50);
+    $('baR').addEventListener('input',e=>drawBA(a,b,c,+e.target.value));
+  }else{
+    $('cmpBox').innerHTML=`<div class="cmpres"><div class="cmphead">${T('Буква E: динамика')}</div><div style="font-size:12.5px;color:#3a4d66">${T('Сделайте повторный снимок через 1–3 месяца, чтобы увидеть изменения.')}</div></div>`;
+  }
+  $('evoBtn').style.display=n>=2?'inline-block':'none';
+  $('lesTimeline').innerHTML=l.scans.slice().reverse().map((x,i)=>`<div class="chip ${x.cls==='ok'?'':x.cls}"><img src="${x.thumb}" alt="" class="tl"><span>${fmtDate(x.ts)}<br><small>${T('снимок')} ${n-i}</small></span><span>${T(STATUS[x.cls])}</span></div>`).join('');
+}
+const imgCache={};
+function img(src,cb){if(imgCache[src]&&imgCache[src].complete){cb(imgCache[src]);return;}const i=new Image();i.onload=()=>cb(i);i.src=src;imgCache[src]=i;}
+function cropAt(sc,cs){return {x:sc.cx-cs/2,y:sc.cy-cs/2,s:cs};}
+function drawCrop(x,im,cr,S){x.fillStyle='#d8c0a8';x.fillRect(0,0,S,S);x.drawImage(im,cr.x*2,cr.y*2,cr.s*2,cr.s*2,0,0,S,S);}
+function edgesOf(m,w,h){const e=[];for(let i=0;i<m.length;i++){if(!m[i])continue;const px=i%w,py=(i/w)|0;if(px===0||py===0||px===w-1||py===h-1||!m[i-1]||!m[i+1]||!m[i-w]||!m[i+w])e.push([px,py]);}return e;}
+function drawBA(a,b,c,pos){
+  const cv=$('baCv');if(!cv)return;const x=cv.getContext('2d'),S=cv.width;
+  const cs=Math.max(a.crop.s,b.crop.s)*1.15,ca=cropAt(a,cs),cb=cropAt(b,cs);
+  img(a.frame,ia=>img(b.frame,ib=>{
+    drawCrop(x,ib,cb,S);
+    const cut=S*pos/100;x.save();x.beginPath();x.rect(0,0,cut,S);x.clip();drawCrop(x,ia,ca,S);x.restore();
+    if(c){
+      const pS=Math.max(2,S/cs*.9);
+      x.fillStyle='#2F6FE0';edgesOf(c.ma,a.w,a.h).forEach(([px,py])=>x.fillRect((px-ca.x)/cs*S,(py-ca.y)/cs*S,pS,pS));
+      x.fillStyle='#11B5B9';edgesOf(c.mb,b.w,b.h).forEach(([px,py])=>x.fillRect((px-cb.x)/cs*S,(py-cb.y)/cs*S,pS,pS));
+    }
+    x.fillStyle='#fff';x.fillRect(cut-1.5,0,3,S);
+  }));
+}
+function playEvolution(){
+  const l=lesionById(curLesion);if(!l||l.scans.length<2)return;
+  const cv=$('baCv');if(!cv)return;stopEvolution();
+  const x=cv.getContext('2d'),S=cv.width,list=l.scans;let i=0,t=0;
+  const cs=Math.max(...list.map(s=>s.crop.s))*1.15;
+  const imgs=[];let loaded=0;
+  list.forEach((s,k)=>img(s.frame,im=>{imgs[k]=im;loaded++;}));
+  const lbl=k=>{x.fillStyle='rgba(11,42,91,.78)';x.fillRect(0,S-30,S,30);x.fillStyle='#fff';x.font='bold 15px Inter, Arial';x.fillText(fmtDate(list[k].ts)+' · '+T('снимок')+' '+(k+1),10,S-10);};
+  evoTimer=setInterval(()=>{
+    if(loaded<list.length)return;
+    t+=.04;if(t>=1){t=0;i++;if(i>=list.length-1){stopEvolution();const c=compareScans(list[list.length-2],list[list.length-1]);drawBA(list[list.length-2],list[list.length-1],c,+$('baR').value);return;}}
+    drawCrop(x,imgs[i],cropAt(list[i],cs),S);x.globalAlpha=t;drawCrop(x,imgs[i+1],cropAt(list[i+1],cs),S);x.globalAlpha=1;
+    lbl(t<.5?i:i+1);
+  },60);
+}
+
+/* ---------- пример паспорта для показа ---------- */
+function exampleScan(seed,irregular,step,ts,prev){
+  const src=makeSample(seed,irregular,step),an=analyze(src);
+  const scan={ts,w:an.w,h:an.h,cx:an.cx,cy:an.cy,mask:encodeRLE(an.mask),
+    m:{A:an.A,B:an.B,C:an.C,D:an.D,frac:an.frac,nA:an.nA,nB:an.nB,nC:an.nC,nD:an.nD,risk:an.risk,lab:an.lab,bright:an.quality.bright},
+    thumb:makeThumb(src,an),frame:an.frame,crop:an.crop,source:'пример',red:[]};
+  const cmp=prev?compareScans(prev,scan):null;
+  let cls=an.risk>=.6||an.risk*.7>=.45?'bad':an.risk*.7>=.22?'mid':'ok';
+  if(cmp&&cmp.level==='mid'&&cls==='ok')cls='mid';if(cmp&&cmp.level==='bad')cls='bad';
+  scan.cls=cls;return scan;
+}
+function loadExample(){
+  const DAY=864e5,now=Date.now();
+  const l1={id:'Lex1',area:'Руки',created:now-90*DAY,example:true,demo:{seed:101,irregular:false},scans:[]};
+  l1.scans.push(exampleScan(101,false,0,now-90*DAY,null));
+  l1.scans.push(exampleScan(101,false,1,now-30*DAY,l1.scans[0]));
+  const l2={id:'Lex2',area:'Спина',created:now-120*DAY,example:true,demo:{seed:202,irregular:true},scans:[]};
+  l2.scans.push(exampleScan(202,true,0,now-120*DAY,null));
+  l2.scans.push(exampleScan(202,true,1,now-60*DAY,l2.scans[0]));
+  l2.scans.push(exampleScan(202,true,2,now-5*DAY,l2.scans[1]));
+  lesions=lesions.filter(l=>!l.example).concat([l1,l2]);saveStore();
+  renderPassport();
+}
+
+/* ---------- сводка для врача ---------- */
+function openSummary(){
+  const ctx=contextRisk('');
+  const lc=x=>T(x).toLocaleLowerCase(LANG==='kk'?'kk':'ru');
+  const prof=[sel('aAge').t,T('тип кожи')+': '+lc(sel('aSkin').t),T('родинок')+': '+lc(sel('aMoles').t)]
+    .concat(ctx.other.map(lc)).concat(ctx.fam.length?[T('У родственников')+': '+ctx.fam.map(lc).join(', ')]:[]);
+  $('docSheet').innerHTML=`<h3 id="docTitle">${T('Сводка для врача')} · DermoScan AI</h3>
+    <div class="docmeta">${T('Сформировано')}: ${fmtDate(Date.now())}. ${T('Самостоятельные снимки пользователя. Это не диагноз.')}</div>
+    <div class="docsec"><b>${T('Анамнез')}</b><div>${anamDone?prof.map(esc).join('; '):T('Анамнез не заполнен.')}</div>
+    ${ctx.red.length?`<div class="redflag" style="margin-top:6px">${T('Тревожные симптомы')}: ${ctx.red.map(lc).join(', ')}</div>`:''}</div>
+    ${lesions.map(l=>{const n=l.scans.length,c=n>=2?compareScans(l.scans[n-2],l.scans[n-1]):null;
+      return `<div class="docsec"><b>${esc(T(l.area))}${l.example?' · '+T('пример'):''}</b> — ${T('снимков')}: ${n}
+      <div class="docthumbs">${l.scans.map(s=>`<figure><img src="${s.thumb}" alt=""><figcaption>${fmtDate(s.ts)}<br>${T(STATUS[s.cls])}</figcaption></figure>`).join('')}</div>
+      ${c?`<div>${T('Изменения за последний период')}: ${T('размер')} ${fmtPct(c.sizeCh)}, ${T('совпадение контура')} ${Math.round(c.iou*100)}%, ${T('цвет')} ΔE ${Math.round(c.dE)}. <b>${T(CMP_TXT[c.level])}</b></div>`:''}</div>`;}).join('')}
+    <div class="docmeta">${T('Пороги сравнения экспериментальные и не проверены клинически.')}</div>`;
+  $('docModal').hidden=false;document.body.classList.add('modal-open');
+  translateTree($('docModal'));
+}
+function closeSummary(){$('docModal').hidden=true;document.body.classList.remove('modal-open');}
+function printSummary(){try{window.print();}catch(e){}}
+$('docModal').addEventListener('click',e=>{if(e.target.id==='docModal')closeSummary();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('docModal').hidden)closeSummary();});
+
+/* ---------- сброс демо ---------- */
+function resetDemo(){
+  lesions=[];saveStore();curLesion=null;scanTarget='new';lastR=null;
+  $('aAge').selectedIndex=1;$('aSkin').value='1';$('aMoles').value='0';$('aArea').selectedIndex=0;$('aText').value='';
+  document.querySelectorAll('.chips .opt.on').forEach(b=>{b.classList.remove('on');b.setAttribute('aria-pressed','false');});
+  anamDone=false;afterAnam=false;
+  go('home');
+}
+
+/* ---------- анимации страницы ---------- */
+const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if('IntersectionObserver' in window && !reduce){
+  const els=document.querySelectorAll('section > *');
+  els.forEach(el=>el.classList.add('reveal'));
+  const io=new IntersectionObserver(es=>es.forEach(e=>{
+    if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}
+  }),{threshold:.12});
+  els.forEach(el=>io.observe(el));
+
+  const cols=document.querySelectorAll('.bars .col'),vals=document.querySelectorAll('.bars .v');
+  cols.forEach(c=>c.style.height='0px');
+  vals.forEach(v=>v.textContent='0%');
+  const chart=document.querySelector('.bars');
+  const io2=new IntersectionObserver(es=>{
+    if(!es[0].isIntersecting) return;
+    io2.disconnect();
+    setTimeout(()=>{
+      cols.forEach(c=>c.style.height=c.dataset.h+'px');
+      vals.forEach(v=>{
+        const t=+v.dataset.count,t0=performance.now();
+        const step=now=>{const k=Math.min((now-t0)/900,1);v.textContent=Math.round(t*k)+'%';if(k<1)requestAnimationFrame(step);};
+        requestAnimationFrame(step);
+      });
+    },200);
+  },{threshold:.4});
+  io2.observe(chart);
+  document.querySelectorAll('[data-num]').forEach(el=>{const t=+el.dataset.num,t0=performance.now()+300;
+    const st=now=>{const k=Math.max(0,Math.min((now-t0)/1100,1));el.textContent=Math.round(t*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(st);};requestAnimationFrame(st);});
+}
+
+
+/* ---------- логотип и навигация ---------- */
+$('logoBtn').addEventListener('click',e=>{
+  e.preventDefault();
+  window.scrollTo({top:0,behavior:reduce?'auto':'smooth'});
+  const l=$('logoBtn');l.classList.remove('pulse');void l.offsetWidth;l.classList.add('pulse');
+});
+document.querySelector('.foot-logo').addEventListener('click',e=>{e.preventDefault();window.scrollTo({top:0,behavior:reduce?'auto':'smooth'});});
+const navLinks=[...document.querySelectorAll('nav .links a')];
+function onScroll(){
+  const h=document.documentElement;
+  $('progress').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+  let cur='';
+  navLinks.forEach(a=>{const sec=document.querySelector(a.getAttribute('href'));if(sec&&sec.getBoundingClientRect().top<innerHeight*.45)cur=a.getAttribute('href');});
+  if(innerHeight+h.scrollTop>=h.scrollHeight-4) cur=navLinks[navLinks.length-1].getAttribute('href');
+  if(h.scrollTop<60) cur='';
+  navLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')===cur));
+}
+window.addEventListener('scroll',onScroll,{passive:true});
+$('menuBtn').addEventListener('click',()=>{const n=$('top-nav'),o=!n.classList.contains('open');n.classList.toggle('open',o);$('menuBtn').setAttribute('aria-expanded',o);});
+navLinks.forEach(a=>a.addEventListener('click',()=>{$('top-nav').classList.remove('open');$('menuBtn').setAttribute('aria-expanded','false');}));
+onScroll();
+
+renderHome();
+
+/* ---------- переключение языка ---------- */
+function setLang(l){
+  LANG=l;
+  document.documentElement.lang=l==='kk'?'kk':'ru';
+  document.querySelectorAll('.lang button').forEach(b=>{const on=b.dataset.l===l;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);});
+  translateTree(document.body);
+  document.title=T(RU_TITLE);
+  renderHome();
+  const scr=document.querySelector('.screen.on'),sn=scr?scr.dataset.s:'';
+  if(sn==='pass') renderPassport();
+  if(sn==='lesion') renderLesion();
+  if(sn==='anam') setAnamLabels();
+  if(sn==='scan'&&$('pickRow').style.display!=='none'){const v=$('tgtSel').value;fillTargets();$('tgtSel').value=v;}
+  if(lastR&&$('resBox').style.display==='block') renderResult(lastR);
+  if(!$('docModal').hidden) openSummary();
+  try{localStorage.setItem('dsLang',l);}catch(e){}
+}
+document.querySelectorAll('.lang button').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.l)));
+translateTree(document.body);
+try{const saved=localStorage.getItem('dsLang');if(saved==='kk')setLang('kk');}catch(e){}
+</script>
+</body>
+</html>
