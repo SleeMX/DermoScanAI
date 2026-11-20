@@ -950,9 +950,16 @@ function stopCam(){
   const b=$('camBtn');if(b){b.textContent=T('Камера');b.classList.remove('on');}
 }
 function captureFrame(){
-  const v=$('cam'),c=document.createElement('canvas');
-  c.width=v.videoWidth||640;c.height=v.videoHeight||480;
-  c.getContext('2d').drawImage(v,0,0,c.width,c.height);
+  const v=$('cam');
+  const vw=v.videoWidth||640,vh=v.videoHeight||480;
+  const bw=v.clientWidth||vw,bh=v.clientHeight||vh;
+  const s=Math.max(bw/vw,bh/vh);
+  const sw=Math.min(vw,bw/s),sh=Math.min(vh,bh/s);
+  const sx=(vw-sw)/2,sy=(vh-sh)/2;
+  const k=Math.min(1,1024/Math.max(sw,sh));
+  const c=document.createElement('canvas');
+  c.width=Math.max(16,Math.round(sw*k));c.height=Math.max(16,Math.round(sh*k));
+  c.getContext('2d').drawImage(v,sx,sy,sw,sh,0,0,c.width,c.height);
   processImage(c,'камера',null);
 }
 function onPick(e){
@@ -1031,6 +1038,139 @@ function rgb2lab(r,g,b){
   X=h(X);Y=h(Y);Z=h(Z);
   return [116*Y-16,500*(X-Y),200*(Y-Z)];
 }
+/* Выделение образования: удаление волос, компенсация освещения, признак «темнее кожи + отличие по цвету» (Lab), порог Оцу, морфология, выбор области у центра, уточнение границы. */
+function segmentLesion(d,w,h){
+  const P=w*h,minWH=Math.min(w,h);
+  const L=new Float32Array(P),Aa=new Float32Array(P),Bb=new Float32Array(P);
+  for(let i=0;i<P;i++){const l=rgb2lab(d[i*4],d[i*4+1],d[i*4+2]);L[i]=l[0];Aa[i]=l[1];Bb[i]=l[2];}
+  const hr=Math.max(1,Math.round(minWH/60));
+  const mm=(src,isMax,horiz)=>{const o=new Float32Array(P);for(let y=0;y<h;y++)for(let x=0;x<w;x++){let r=isMax?-1e9:1e9;
+    for(let k=-hr;k<=hr;k++){const X=horiz?x+k:x,Y=horiz?y:y+k;if(X<0||Y<0||X>=w||Y>=h)continue;const v=src[Y*w+X];r=isMax?(v>r?v:r):(v<r?v:r);}o[y*w+x]=r;}return o;};
+  const Lc=mm(mm(mm(mm(L,true,true),true,false),false,true),false,false);
+  const hairM=new Uint8Array(P);
+  for(let i=0;i<P;i++)if(Lc[i]-L[i]>10)hairM[i]=1;
+  for(let i=0;i<P;i++)if(hairM[i])L[i]=Lc[i];
+  {const ka=Aa.slice(),kb=Bb.slice(),R2=hr+1;
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=y*w+x;if(!hairM[i])continue;let sa=0,sb=0,c=0;
+      for(let j=-R2;j<=R2;j++)for(let k=-R2;k<=R2;k++){const X=x+k,Y=y+j;if(X<0||Y<0||X>=w||Y>=h)continue;const q=Y*w+X;if(hairM[q])continue;sa+=ka[q];sb+=kb[q];c++;}
+      if(c){Aa[i]=sa/c;Bb[i]=sb/c;}}}
+  const GX=Math.max(4,Math.round(w/18)),GY=Math.max(4,Math.round(h/18));
+  let grid=new Float32Array(GX*GY);
+  for(let gy=0;gy<GY;gy++)for(let gx=0;gx<GX;gx++){
+    const xa=Math.floor(gx*w/GX),xb=Math.floor((gx+1)*w/GX),ya=Math.floor(gy*h/GY),yb=Math.floor((gy+1)*h/GY),v=[];
+    for(let y=ya;y<yb;y++)for(let x=xa;x<xb;x++)v.push(L[y*w+x]);
+    v.sort((p,q)=>p-q);grid[gy*GX+gx]=v.length?v[Math.floor(v.length*.7)]:0;
+  }
+  const gfilt=(gr,R,isMax)=>{const o=new Float32Array(GX*GY);
+    for(let gy=0;gy<GY;gy++)for(let gx=0;gx<GX;gx++){let r=isMax?-1e9:1e9;
+      for(let j=-R;j<=R;j++)for(let i=-R;i<=R;i++){const X=gx+i,Y=gy+j;if(X<0||Y<0||X>=GX||Y>=GY)continue;const v=gr[Y*GX+X];r=isMax?Math.max(r,v):Math.min(r,v);}
+      o[gy*GX+gx]=r;}return o;};
+  grid=gfilt(gfilt(grid,2,true),2,false);
+  {const o=new Float32Array(GX*GY);for(let gy=0;gy<GY;gy++)for(let gx=0;gx<GX;gx++){let s=0,c=0;
+    for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++){const X=gx+i,Y=gy+j;if(X<0||Y<0||X>=GX||Y>=GY)continue;s+=grid[Y*GX+X];c++;}o[gy*GX+gx]=s/c;}grid=o;}
+  const Lbg=new Float32Array(P);
+  for(let y=0;y<h;y++){const fy=Math.min(GY-1,Math.max(0,(y+.5)*GY/h-.5)),y0=Math.floor(fy),y1=Math.min(GY-1,y0+1),ty=fy-y0;
+    for(let x=0;x<w;x++){const fx=Math.min(GX-1,Math.max(0,(x+.5)*GX/w-.5)),x0=Math.floor(fx),x1=Math.min(GX-1,x0+1),tx=fx-x0;
+      Lbg[y*w+x]=(grid[y0*GX+x0]*(1-tx)+grid[y0*GX+x1]*tx)*(1-ty)+(grid[y1*GX+x0]*(1-tx)+grid[y1*GX+x1]*tx)*ty;}}
+  const med=(arr)=>{const s=Float32Array.from(arr).sort();return s.length?s[s.length>>1]:0;};
+  const skinA=[],skinB=[],res=[];
+  for(let i=0;i<P;i+=2){const dl=L[i]-Lbg[i];if(dl>-8){skinA.push(Aa[i]);skinB.push(Bb[i]);}res.push(dl);}
+  const a0=med(skinA),b0=med(skinB);
+  const rmed=med(res),madL=med(res.map(v=>Math.abs(v-rmed)))||1;
+  let f=new Float32Array(P);
+  for(let i=0;i<P;i++){
+    const dL=Math.max(0,Lbg[i]-L[i]);
+    const da=Aa[i]-a0,db=Bb[i]-b0;
+    const cw=Lbg[i]>25?.7:.2;
+    f[i]=dL+cw*Math.sqrt(da*da+db*db);
+  }
+  const blur=(src)=>{const t=new Float32Array(P),o=new Float32Array(P);
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++){let s=0,c=0;for(let k=-1;k<=1;k++){const xx=x+k;if(xx>=0&&xx<w){s+=src[y*w+xx];c++;}}t[y*w+x]=s/c;}
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++){let s=0,c=0;for(let k=-1;k<=1;k++){const yy=y+k;if(yy>=0&&yy<h){s+=t[yy*w+x];c++;}}o[y*w+x]=s/c;}
+    return o;};
+  f=blur(blur(f));
+  const sorted=Float32Array.from(f).sort();
+  const fMax=Math.max(1,sorted[Math.floor(P*.995)]);
+  const hist=new Array(256).fill(0);
+  for(let i=0;i<P;i++)hist[Math.min(255,(f[i]/fMax*255)|0)]++;
+  let sAll=0;for(let t=0;t<256;t++)sAll+=t*hist[t];
+  let sB=0,wB=0,best=-1,tb=128;
+  for(let t=0;t<256;t++){wB+=hist[t];if(!wB)continue;const wF=P-wB;if(!wF)break;sB+=t*hist[t];
+    const mB=sB/wB,mF=(sAll-sB)/wF,bt=wB*wF*(mB-mF)*(mB-mF);if(bt>best){best=bt;tb=t;}}
+  const noise=Math.max(2,2*madL);
+  const thr=Math.max((tb+.5)/255*fMax,noise+4,7);
+  let bin=new Uint8Array(P);for(let i=0;i<P;i++)bin[i]=f[i]>thr?1:0;
+  const r=Math.max(1,Math.round(minWH/90));
+  const integ=(b)=>{const I=new Int32Array((w+1)*(h+1));
+    for(let y=0;y<h;y++){let row=0;for(let x=0;x<w;x++){row+=b[y*w+x];I[(y+1)*(w+1)+x+1]=I[y*(w+1)+x+1]+row;}}return I;};
+  const boxSum=(I,x0,y0,x1,y1)=>I[(y1+1)*(w+1)+x1+1]-I[y0*(w+1)+x1+1]-I[(y1+1)*(w+1)+x0]+I[y0*(w+1)+x0];
+  const morph=(b,erode)=>{const I=integ(b),o=new Uint8Array(P);
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+      const x0=Math.max(0,x-r),x1=Math.min(w-1,x+r),y0=Math.max(0,y-r),y1=Math.min(h-1,y+r);
+      const s=boxSum(I,x0,y0,x1,y1);
+      o[y*w+x]=erode?(s===(x1-x0+1)*(y1-y0+1)?1:0):(s>0?1:0);}
+    return o;};
+  bin=morph(morph(bin,true),false);
+  const lab=new Int32Array(P).fill(-1),comps=[];
+  for(let s=0;s<P;s++){
+    if(!bin[s]||lab[s]>=0)continue;
+    const id=comps.length,st=[s];lab[s]=id;
+    let area=0,sf=0,sx=0,sy=0,edgeT=0;
+    while(st.length){const i=st.pop();area++;sf+=f[i];const x=i%w,y=(i/w)|0;sx+=x;sy+=y;
+      if(x===0||y===0||x===w-1||y===h-1)edgeT++;
+      if(x>0&&bin[i-1]&&lab[i-1]<0){lab[i-1]=id;st.push(i-1);}
+      if(x<w-1&&bin[i+1]&&lab[i+1]<0){lab[i+1]=id;st.push(i+1);}
+      if(y>0&&bin[i-w]&&lab[i-w]<0){lab[i-w]=id;st.push(i-w);}
+      if(y<h-1&&bin[i+w]&&lab[i+w]<0){lab[i+w]=id;st.push(i+w);}}
+    comps.push({area,mf:sf/area,cx:sx/area,cy:sy/area,edgeT});
+  }
+  const sig=.28*minWH;let bestC=-1,bestS=0;
+  comps.forEach((c,id)=>{
+    if(c.area<P*.003)return;
+    const dx=c.cx-w/2,dy=c.cy-h/2,dist2=dx*dx+dy*dy;
+    let sc=c.mf*Math.pow(c.area,.75)*Math.exp(-dist2/(2*sig*sig));
+    const perim=2*(w+h);
+    if(c.edgeT>perim*.01) sc*=.25;
+    if(c.edgeT>perim*.08) sc*=.2;
+    if(c.edgeT>perim*.03&&Math.sqrt(dist2)>.3*minWH) return;
+    if(sc>bestS){bestS=sc;bestC=id;}
+  });
+  if(bestC<0)return null;
+  let bx0=w,bx1=0,by0=h,by1=0,inS=0,inN=0;
+  for(let i=0;i<P;i++)if(lab[i]===bestC){const x=i%w,y=(i/w)|0;
+    if(x<bx0)bx0=x;if(x>bx1)bx1=x;if(y<by0)by0=y;if(y>by1)by1=y;inS+=f[i];inN++;}
+  const padX=Math.round((bx1-bx0+1)*.6)+3,padY=Math.round((by1-by0+1)*.6)+3;
+  const wx0=Math.max(0,bx0-padX),wx1=Math.min(w-1,bx1+padX),wy0=Math.max(0,by0-padY),wy1=Math.min(h-1,by1+padY);
+  const ring=[];
+  for(let y=wy0;y<=wy1;y++)for(let x=wx0;x<=wx1;x++){const i=y*w+x;if(lab[i]!==bestC&&!bin[i])ring.push(f[i]);}
+  const fin=inS/inN,fout=ring.length?med(ring):0;
+  const thrL=Math.max(noise+2,fout+.33*(fin-fout));
+  const mask=new Uint8Array(P);
+  {const st=[];
+    for(let i=0;i<P;i++)if(lab[i]===bestC&&f[i]>thrL){mask[i]=1;st.push(i);}
+    if(!st.length)for(let i=0;i<P;i++)if(lab[i]===bestC){mask[i]=1;st.push(i);}
+    while(st.length){const i=st.pop(),x=i%w,y=(i/w)|0;
+      for(const j of [x>wx0?i-1:-1,x<wx1?i+1:-1,y>wy0?i-w:-1,y<wy1?i+w:-1])
+        if(j>=0&&!mask[j]&&f[j]>thrL){mask[j]=1;st.push(j);}}
+  }
+  {let opened=morph(morph(mask,true),false),bestA=0,bestSeed=-1;const seen=new Uint8Array(P);
+    for(let s0=0;s0<P;s0++){if(!opened[s0]||seen[s0])continue;let a=0;const q=[s0];seen[s0]=1;
+      while(q.length){const i=q.pop();a++;const x=i%w,y=(i/w)|0;
+        for(const j of [x>0?i-1:-1,x<w-1?i+1:-1,y>0?i-w:-1,y<h-1?i+w:-1])if(j>=0&&opened[j]&&!seen[j]){seen[j]=1;q.push(j);}}
+      if(a>bestA){bestA=a;bestSeed=s0;}}
+    if(bestSeed>=0){mask.fill(0);const q=[bestSeed];mask[bestSeed]=1;
+      while(q.length){const i=q.pop();const x=i%w,y=(i/w)|0;
+        for(const j of [x>0?i-1:-1,x<w-1?i+1:-1,y>0?i-w:-1,y<h-1?i+w:-1])if(j>=0&&opened[j]&&!mask[j]){mask[j]=1;q.push(j);}}}
+  }
+  const out=new Uint8Array(P),st=[];
+  const push=i=>{if(!mask[i]&&!out[i]){out[i]=1;st.push(i);}};
+  for(let x=0;x<w;x++){push(x);push((h-1)*w+x);}
+  for(let y=0;y<h;y++){push(y*w);push(y*w+w-1);}
+  while(st.length){const i=st.pop(),x=i%w,y=(i/w)|0;
+    if(x>0)push(i-1);if(x<w-1)push(i+1);if(y>0)push(i-w);if(y<h-1)push(i+w);}
+  for(let i=0;i<P;i++)if(!out[i])mask[i]=1;
+  return mask;
+}
 function analyze(src){
   const N=200,k=N/Math.max(src.width,src.height);
   const w=Math.max(16,Math.round(src.width*k)),h=Math.max(16,Math.round(src.height*k));
@@ -1047,28 +1187,13 @@ function analyze(src){
   quality.ok=quality.light==='норма'&&quality.focus==='резко';
   const fc=document.createElement('canvas');fc.width=w*2;fc.height=h*2;fc.getContext('2d').drawImage(src,0,0,fc.width,fc.height);
   const frame=fc.toDataURL('image/jpeg',.8);
-
-  const hist=new Array(256).fill(0);for(let i=0;i<P;i++)hist[g[i]|0]++;
-  let sAll=0;for(let t=0;t<256;t++)sAll+=t*hist[t];
-  let sB=0,wB=0,best=-1,thr=128;
-  for(let t=0;t<256;t++){wB+=hist[t];if(!wB)continue;const wF=P-wB;if(!wF)break;sB+=t*hist[t];
-    const mB=sB/wB,mF=(sAll-sB)/wF,bt=wB*wF*(mB-mF)*(mB-mF);if(bt>best){best=bt;thr=t;}}
-  const dark=new Uint8Array(P);for(let i=0;i<P;i++)dark[i]=g[i]<thr?1:0;
-  let seed=-1,mn=1e9;
-  for(let yy=Math.floor(h*.2);yy<h*.8;yy++)for(let xx=Math.floor(w*.2);xx<w*.8;xx++){const i=yy*w+xx;if(dark[i]&&g[i]<mn){mn=g[i];seed=i;}}
-  if(seed<0) return {found:false,quality,w,h,frame};
-  const mask=new Uint8Array(P),stack=[seed];mask[seed]=1;
+  const mask=segmentLesion(d,w,h);
+  if(!mask) return {found:false,quality,w,h,frame};
   let area=0,sx=0,sy=0,x0=w,x1=0,y0=h,y1=0;
-  while(stack.length){
-    const i=stack.pop();area++;const px=i%w,py=(i/w)|0;sx+=px;sy+=py;
-    if(px<x0)x0=px;if(px>x1)x1=px;if(py<y0)y0=py;if(py>y1)y1=py;
-    if(px>0&&dark[i-1]&&!mask[i-1]){mask[i-1]=1;stack.push(i-1);}
-    if(px<w-1&&dark[i+1]&&!mask[i+1]){mask[i+1]=1;stack.push(i+1);}
-    if(py>0&&dark[i-w]&&!mask[i-w]){mask[i-w]=1;stack.push(i-w);}
-    if(py<h-1&&dark[i+w]&&!mask[i+w]){mask[i+w]=1;stack.push(i+w);}
-  }
+  for(let i=0;i<P;i++){if(!mask[i])continue;area++;const px=i%w,py=(i/w)|0;sx+=px;sy+=py;
+    if(px<x0)x0=px;if(px>x1)x1=px;if(py<y0)y0=py;if(py>y1)y1=py;}
   const frac=area/P;
-  if(frac<.004||frac>.6) return {found:false,quality,w,h,frame};
+  if(frac<.003||frac>.6) return {found:false,quality,w,h,frame};
   const cx=sx/area,cy=sy/area;
   let xv=0,xh=0,per=0,sr=0,sg=0,sb=0,sr2=0,sg2=0,sb2=0;
   const edge=[];
