@@ -1,0 +1,293 @@
+{
+ "classes": [
+  "akiec",
+  "bcc",
+  "bkl",
+  "df",
+  "mel",
+  "nv",
+  "vasc"
+ ],
+ "names_ru": {
+  "akiec": "Актинический кератоз",
+  "bcc": "Базальноклеточная карцинома",
+  "bkl": "Доброкачественный кератоз",
+  "df": "Дерматофиброма",
+  "mel": "Меланома",
+  "nv": "Родинка (невус)",
+  "vasc": "Сосудистое образование"
+ },
+ "urgent": [
+  "akiec",
+  "bcc",
+  "mel"
+ ],
+ "threshold": 0.19970111548900604,
+ "image_size": 224,
+ "mean": [
+  0.485,
+  0.456,
+  0.406
+ ],
+ "std": [
+  0.229,
+  0.224,
+  0.225
+ ],
+ "arch": "efficientnet_b0",
+ "preprocess": "RGB -> resize (224,224) без сохранения пропорций -> /255 -> normalize",
+ "samples": [
+  {
+   "file": "samples/akiec_ISIC_0025350.jpg",
+   "true": "akiec",
+   "pred": "bcc",
+   "urgent_score": 0.9985
+  },
+  {
+   "file": "samples/akiec_ISIC_0025368.jpg",
+   "true": "akiec",
+   "pred": "akiec",
+   "urgent_score": 0.9992
+  },
+  {
+   "file": "samples/akiec_ISIC_0025471.jpg",
+   "true": "akiec",
+   "pred": "bcc",
+   "urgent_score": 0.9866
+  },
+  {
+   "file": "samples/akiec_ISIC_0027930.jpg",
+   "true": "akiec",
+   "pred": "nv",
+   "urgent_score": 0.2083
+  },
+  {
+   "file": "samples/akiec_ISIC_0030297.jpg",
+   "true": "akiec",
+   "pred": "akiec",
+   "urgent_score": 0.9368
+  },
+  {
+   "file": "samples/akiec_ISIC_0033494.jpg",
+   "true": "akiec",
+   "pred": "akiec",
+   "urgent_score": 0.9949
+  },
+  {
+   "file": "samples/bcc_ISIC_0025940.jpg",
+   "true": "bcc",
+   "pred": "akiec",
+   "urgent_score": 0.9948
+  },
+  {
+   "file": "samples/bcc_ISIC_0027281.jpg",
+   "true": "bcc",
+   "pred": "bcc",
+   "urgent_score": 1.0
+  },
+  {
+   "file": "samples/bcc_ISIC_0030096.jpg",
+   "true": "bcc",
+   "pred": "bcc",
+   "urgent_score": 0.999
+  },
+  {
+   "file": "samples/bcc_ISIC_0030528.jpg",
+   "true": "bcc",
+   "pred": "bcc",
+   "urgent_score": 0.9891
+  },
+  {
+   "file": "samples/bcc_ISIC_0031407.jpg",
+   "true": "bcc",
+   "pred": "bcc",
+   "urgent_score": 0.9086
+  },
+  {
+   "file": "samples/bcc_ISIC_0032225.jpg",
+   "true": "bcc",
+   "pred": "akiec",
+   "urgent_score": 0.9586
+  },
+  {
+   "file": "samples/bkl_ISIC_0027504.jpg",
+   "true": "bkl",
+   "pred": "bkl",
+   "urgent_score": 0.0076
+  },
+  {
+   "file": "samples/bkl_ISIC_0029270.jpg",
+   "true": "bkl",
+   "pred": "bkl",
+   "urgent_score": 0.001
+  },
+  {
+   "file": "samples/bkl_ISIC_0029836.jpg",
+   "true": "bkl",
+   "pred": "nv",
+   "urgent_score": 0.3353
+  },
+  {
+   "file": "samples/bkl_ISIC_0030272.jpg",
+   "true": "bkl",
+   "pred": "bkl",
+   "urgent_score": 0.001
+  },
+  {
+   "file": "samples/bkl_ISIC_0031650.jpg",
+   "true": "bkl",
+   "pred": "bcc",
+   "urgent_score": 0.9297
+  },
+  {
+   "file": "samples/bkl_ISIC_0032843.jpg",
+   "true": "bkl",
+   "pred": "bkl",
+   "urgent_score": 0.2731
+  },
+  {
+   "file": "samples/df_ISIC_0025314.jpg",
+   "true": "df",
+   "pred": "df",
+   "urgent_score": 0.0
+  },
+  {
+   "file": "samples/df_ISIC_0025903.jpg",
+   "true": "df",
+   "pred": "df",
+   "urgent_score": 0.0023
+  },
+  {
+   "file": "samples/df_ISIC_0026473.jpg",
+   "true": "df",
+   "pred": "bkl",
+   "urgent_score": 0.2752
+  },
+  {
+   "file": "samples/df_ISIC_0027876.jpg",
+   "true": "df",
+   "pred": "bkl",
+   "urgent_score": 0.2078
+  },
+  {
+   "file": "samples/df_ISIC_0029967.jpg",
+   "true": "df",
+   "pred": "mel",
+   "urgent_score": 0.7089
+  },
+  {
+   "file": "samples/df_ISIC_0029973.jpg",
+   "true": "df",
+   "pred": "df",
+   "urgent_score": 0.0017
+  },
+  {
+   "file": "samples/mel_ISIC_0024701.jpg",
+   "true": "mel",
+   "pred": "nv",
+   "urgent_score": 0.1388
+  },
+  {
+   "file": "samples/mel_ISIC_0030616.jpg",
+   "true": "mel",
+   "pred": "mel",
+   "urgent_score": 0.9174
+  },
+  {
+   "file": "samples/mel_ISIC_0032517.jpg",
+   "true": "mel",
+   "pred": "mel",
+   "urgent_score": 0.8304
+  },
+  {
+   "file": "samples/mel_ISIC_0033029.jpg",
+   "true": "mel",
+   "pred": "mel",
+   "urgent_score": 0.5115
+  },
+  {
+   "file": "samples/mel_ISIC_0033612.jpg",
+   "true": "mel",
+   "pred": "nv",
+   "urgent_score": 0.2734
+  },
+  {
+   "file": "samples/mel_ISIC_0034059.jpg",
+   "true": "mel",
+   "pred": "mel",
+   "urgent_score": 0.9946
+  },
+  {
+   "file": "samples/nv_ISIC_0026151.jpg",
+   "true": "nv",
+   "pred": "nv",
+   "urgent_score": 0.3993
+  },
+  {
+   "file": "samples/nv_ISIC_0027714.jpg",
+   "true": "nv",
+   "pred": "nv",
+   "urgent_score": 0.0093
+  },
+  {
+   "file": "samples/nv_ISIC_0028266.jpg",
+   "true": "nv",
+   "pred": "nv",
+   "urgent_score": 0.0
+  },
+  {
+   "file": "samples/nv_ISIC_0030419.jpg",
+   "true": "nv",
+   "pred": "nv",
+   "urgent_score": 0.0001
+  },
+  {
+   "file": "samples/nv_ISIC_0031082.jpg",
+   "true": "nv",
+   "pred": "nv",
+   "urgent_score": 0.0001
+  },
+  {
+   "file": "samples/nv_ISIC_0032933.jpg",
+   "true": "nv",
+   "pred": "nv",
+   "urgent_score": 0.0091
+  },
+  {
+   "file": "samples/vasc_ISIC_0025807.jpg",
+   "true": "vasc",
+   "pred": "vasc",
+   "urgent_score": 0.0
+  },
+  {
+   "file": "samples/vasc_ISIC_0026393.jpg",
+   "true": "vasc",
+   "pred": "vasc",
+   "urgent_score": 0.0
+  },
+  {
+   "file": "samples/vasc_ISIC_0028406.jpg",
+   "true": "vasc",
+   "pred": "vasc",
+   "urgent_score": 0.0
+  },
+  {
+   "file": "samples/vasc_ISIC_0029099.jpg",
+   "true": "vasc",
+   "pred": "vasc",
+   "urgent_score": 0.0003
+  },
+  {
+   "file": "samples/vasc_ISIC_0031215.jpg",
+   "true": "vasc",
+   "pred": "vasc",
+   "urgent_score": 0.0
+  },
+  {
+   "file": "samples/vasc_ISIC_0033817.jpg",
+   "true": "vasc",
+   "pred": "vasc",
+   "urgent_score": 0.0001
+  }
+ ]
+}
