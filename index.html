@@ -1067,6 +1067,13 @@ function segmentLesion(d,w,h){
     if(Cr>131&&Cr<185&&Cb>72&&Cb<135&&Y>35){skinRaw[i]=1;skinN++;}}
   // убираем мелкие «кожеподобные» пятна фона, заполняем дыры (родинка, волосы)
   let skinF=fillHoles(morphR(morphR(skinRaw,true,1),false,1));
+  // оставляем только самую крупную область кожи (рука), отдельные «кожеподобные» лампы и предметы отбрасываем
+  {const lb=new Int32Array(P).fill(-1);let bestA=0,bestId=-1,id=0;
+    for(let s=0;s<P;s++){if(!skinF[s]||lb[s]>=0)continue;let a=0;const q=[s];lb[s]=id;
+      while(q.length){const i=q.pop();a++;const x=i%w,y=(i/w)|0;
+        for(const j of [x>0?i-1:-1,x<w-1?i+1:-1,y>0?i-w:-1,y<h-1?i+w:-1])if(j>=0&&skinF[j]&&lb[j]<0){lb[j]=id;q.push(j);}}
+      if(a>bestA){bestA=a;bestId=id;}id++;}
+    for(let i=0;i<P;i++)skinF[i]=lb[i]===bestId?1:0;}
   const skinCore=morphR(skinF,true,Math.max(2,Math.round(minWH/40)));
   let coreN=0;for(let i=0;i<P;i++)coreN+=skinCore[i];
   const useSkin=skinN>P*.15&&coreN>P*.08; // кожи мало — работаем по всему кадру, как раньше
@@ -1205,6 +1212,93 @@ function segmentLesion(d,w,h){
   }
   return fillHoles(mask);
 }
+/* Плавный контур маски с субпиксельной точностью (marching squares): отрезки [x1,y1,x2,y2,...] в координатах маски */
+function maskContour(mask,w,h){
+  const P=w*h,t=new Float32Array(P),v=new Float32Array(P);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){let s=0;for(let k=-1;k<=1;k++){const xx=x+k;if(xx>=0&&xx<w)s+=mask[y*w+xx];}t[y*w+x]=s/3;}
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){let s=0;for(let k=-1;k<=1;k++){const yy=y+k;if(yy>=0&&yy<h)s+=t[yy*w+x];}v[y*w+x]=s/3;}
+  const g=(x,y)=>(x<0||y<0||x>=w||y>=h)?0:v[y*w+x];
+  const out=[],L=.5,I=(p,q)=>(L-p)/((q-p)||1e-6);
+  for(let y=-1;y<h;y++)for(let x=-1;x<w;x++){
+    const a=g(x,y),b=g(x+1,y),c=g(x+1,y+1),d=g(x,y+1);
+    const ia=a>=L,ib=b>=L,ic=c>=L,id=d>=L;
+    if(ia===ib&&ib===ic&&ic===id)continue;
+    const T=ia!==ib?[x+I(a,b),y]:null,R=ib!==ic?[x+1,y+I(b,c)]:null,B=id!==ic?[x+I(d,c),y+1]:null,Lf=ia!==id?[x,y+I(a,d)]:null;
+    const seg=(p,q)=>out.push(p[0]+.5,p[1]+.5,q[0]+.5,q[1]+.5);
+    if(T&&R&&B&&Lf){if(((a+b+c+d)/4>=L)===ia){seg(T,R);seg(B,Lf);}else{seg(Lf,T);seg(R,B);}}
+    else{const p=[T,R,B,Lf].filter(Boolean);if(p.length===2)seg(p[0],p[1]);}
+  }
+  return out;
+}
+/* Уточнение контура по снимку в высоком разрешении: граница ищется только в узкой полосе вокруг найденной маски.
+   Признаки A, B, C, D и история по-прежнему считаются по маске 200 px. */
+function refineContour(src,mask,w,h){
+  try{
+    const SW=src.width,SH=src.height,P=w*h;
+    let bx0=w,bx1=-1,by0=h,by1=-1,area=0;
+    for(let i=0;i<P;i++)if(mask[i]){const x=i%w,y=(i/w)|0;area++;if(x<bx0)bx0=x;if(x>bx1)bx1=x;if(y<by0)by0=y;if(y>by1)by1=y;}
+    if(bx1<0||area<20)return null;
+    const pad=Math.round(Math.max(bx1-bx0,by1-by0)*.15)+4;
+    const X0=Math.max(0,bx0-pad),Y0=Math.max(0,by0-pad),X1=Math.min(w,bx1+1+pad),Y1=Math.min(h,by1+1+pad);
+    const bw=X1-X0,bh=Y1-Y0;
+    const F=Math.min(4,SW/w,420/Math.max(bw,bh));
+    if(F<1.5)return null;
+    const cw=Math.round(bw*F),ch=Math.round(bh*F),fx=cw/bw,fy=ch/bh,Q=cw*ch;
+    let cur=src,curW=SW,curH=SH;
+    while(curW>w*fx*2.2){const nw=Math.round(curW/2),nh=Math.round(curH/2),t=document.createElement('canvas');t.width=nw;t.height=nh;
+      const tx=t.getContext('2d');tx.imageSmoothingEnabled=true;tx.imageSmoothingQuality='high';tx.drawImage(cur,0,0,nw,nh);cur=t;curW=nw;curH=nh;}
+    const c=document.createElement('canvas');c.width=cw;c.height=ch;
+    const x=c.getContext('2d',{willReadFrequently:true});x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';
+    const sx=curW/w,sy=curH/h;
+    x.drawImage(cur,X0*sx,Y0*sy,bw*sx,bh*sy,0,0,cw,ch);
+    const d=x.getImageData(0,0,cw,ch).data;
+    const box=(s,W,H,r)=>{const t=new Float32Array(W*H),o=new Float32Array(W*H);
+      for(let y=0;y<H;y++)for(let xx=0;xx<W;xx++){let a=0,n=0;for(let k=-r;k<=r;k++){const X=xx+k;if(X>=0&&X<W){a+=s[y*W+X];n++;}}t[y*W+xx]=a/n;}
+      for(let y=0;y<H;y++)for(let xx=0;xx<W;xx++){let a=0,n=0;for(let k=-r;k<=r;k++){const Y=y+k;if(Y>=0&&Y<H){a+=t[Y*W+xx];n++;}}o[y*W+xx]=a/n;}
+      return o;};
+    let L=new Float32Array(Q),A=new Float32Array(Q),B=new Float32Array(Q);
+    for(let i=0;i<Q;i++){const l=rgb2lab(d[i*4],d[i*4+1],d[i*4+2]);L[i]=l[0];A[i]=l[1];B[i]=l[2];}
+    const rr=Math.max(1,Math.round(F/2));L=box(L,cw,ch,rr);A=box(A,cw,ch,rr);B=box(B,cw,ch,rr);
+    let mf=new Float32Array(P);for(let i=0;i<P;i++)mf[i]=mask[i];mf=box(box(mf,w,h,1),w,h,1);
+    const ms=new Float32Array(Q);
+    for(let y=0;y<ch;y++){const my=Math.min(h-1,Math.max(0,Y0+(y+.5)/fy-.5)),y0=Math.floor(my),y1=Math.min(h-1,y0+1),ty=my-y0;
+      for(let xx=0;xx<cw;xx++){const mx=Math.min(w-1,Math.max(0,X0+(xx+.5)/fx-.5)),x0=Math.floor(mx),x1=Math.min(w-1,x0+1),tx=mx-x0;
+        ms[y*cw+xx]=(mf[y0*w+x0]*(1-tx)+mf[y0*w+x1]*tx)*(1-ty)+(mf[y1*w+x0]*(1-tx)+mf[y1*w+x1]*tx)*ty;}}
+    const med=a=>{const s=Float32Array.from(a).sort();return s[s.length>>1];};
+    const iL=[],iA=[],iB=[],oL=[],oA=[],oB=[];
+    for(let i=0;i<Q;i++){if(ms[i]>.97){iL.push(L[i]);iA.push(A[i]);iB.push(B[i]);}else if(ms[i]<.03){oL.push(L[i]);oA.push(A[i]);oB.push(B[i]);}}
+    if(iL.length<30||oL.length<30)return null;
+    const vL=med(iL)-med(oL),vA=med(iA)-med(oA),vB=med(iB)-med(oB),n2=vL*vL+vA*vA+vB*vB;
+    if(n2<25)return null;
+    const Lo=med(oL),Ao=med(oA),Bo=med(oB),lev=.4;
+    const bin=new Uint8Array(Q);let bn=0;
+    for(let i=0;i<Q;i++){let v;
+      if(ms[i]>=.97)v=1;else if(ms[i]<=.03)v=0;else v=((L[i]-Lo)*vL+(A[i]-Ao)*vA+(B[i]-Bo)*vB)/n2;
+      if(v>=lev){bin[i]=1;bn++;}}
+    // самая крупная связная часть + заполнение дыр
+    const keep=new Uint8Array(Q);
+    {const seen=new Uint8Array(Q);let bestA=0,bestS=-1;
+      for(let s0=0;s0<Q;s0++){if(!bin[s0]||seen[s0])continue;let a=0;const q=[s0];seen[s0]=1;
+        while(q.length){const i=q.pop();a++;const X=i%cw,Y=(i/cw)|0;
+          for(const j of [X>0?i-1:-1,X<cw-1?i+1:-1,Y>0?i-cw:-1,Y<ch-1?i+cw:-1])if(j>=0&&bin[j]&&!seen[j]){seen[j]=1;q.push(j);}}
+        if(a>bestA){bestA=a;bestS=s0;}}
+      if(bestS<0)return null;
+      const q=[bestS];keep[bestS]=1;
+      while(q.length){const i=q.pop();const X=i%cw,Y=(i/cw)|0;
+        for(const j of [X>0?i-1:-1,X<cw-1?i+1:-1,Y>0?i-cw:-1,Y<ch-1?i+cw:-1])if(j>=0&&bin[j]&&!keep[j]){keep[j]=1;q.push(j);}}}
+    {const out=new Uint8Array(Q),st=[];const push=i=>{if(!keep[i]&&!out[i]){out[i]=1;st.push(i);}};
+      for(let X=0;X<cw;X++){push(X);push((ch-1)*cw+X);}for(let Y=0;Y<ch;Y++){push(Y*cw);push(Y*cw+cw-1);}
+      while(st.length){const i=st.pop(),X=i%cw,Y=(i/cw)|0;if(X>0)push(i-1);if(X<cw-1)push(i+1);if(Y>0)push(i-cw);if(Y<ch-1)push(i+cw);}
+      for(let i=0;i<Q;i++)if(!out[i])keep[i]=1;}
+    let ka=0;for(let i=0;i<Q;i++)ka+=keep[i];
+    const ratio=ka/(fx*fy)/area;
+    if(ratio<.75||ratio>1.35)return null;
+    const seg=maskContour(keep,cw,ch);
+    for(let k=0;k<seg.length;k+=2){seg[k]=X0+seg[k]/fx;seg[k+1]=Y0+seg[k+1]/fy;}
+    refineContour.last={keep,cw,ch,X0,Y0,fx,fy,ratio};
+    return seg;
+  }catch(e){return null;}
+}
 function analyze(src){
   const N=200,k=N/Math.max(src.width,src.height);
   const w=Math.max(16,Math.round(src.width*k)),h=Math.max(16,Math.round(src.height*k));
@@ -1252,7 +1346,8 @@ function analyze(src){
   const risk=clamp(.35*nA+.3*nB+.25*nC+.1*nD);
   const size=Math.max(x1-x0,y1-y0)*1.8+6;
   const crop={x:cx-size/2,y:cy-size/2,s:size};
-  return {found:true,quality,w,h,mask,edge,cx,cy,frac,A,B,C,D,nA,nB,nC,nD,risk,lab,crop,frame};
+  const contour=refineContour(src,mask,w,h)||maskContour(mask,w,h);
+  return {found:true,quality,w,h,mask,edge,contour,cx,cy,frac,A,B,C,D,nA,nB,nC,nD,risk,lab,crop,frame};
 }
 function encodeRLE(m){const out=[];let v=0,run=0;for(let i=0;i<m.length;i++){if(m[i]===v)run++;else{out.push(run);run=1;v^=1;}}out.push(run);return out.join(',');}
 function decodeRLE(s,P){const m=new Uint8Array(P);let i=0,v=0;s.split(',').forEach(r=>{const n=+r;if(v)m.fill(1,i,i+n);i+=n;v^=1;});return m;}
@@ -1276,8 +1371,16 @@ function drawShot(src,an){
   cv.style.display='block';
   if(an&&an.found){
     const px=dw/an.w;
-    x.fillStyle='rgba(111,230,234,.95)';
-    an.edge.forEach(i=>{const ex=i%an.w,ey=(i/an.w)|0;x.fillRect(ox+ex*px,oy+ey*px,Math.max(2,px*.9),Math.max(2,px*.9));});
+    if(an.contour&&an.contour.length){
+      const sg=an.contour;
+      x.strokeStyle='rgba(111,230,234,.95)';x.lineWidth=Math.max(3,px*.9);x.lineJoin='round';x.lineCap='round';
+      x.beginPath();
+      for(let k=0;k<sg.length;k+=4){x.moveTo(ox+sg[k]*px,oy+sg[k+1]*px);x.lineTo(ox+sg[k+2]*px,oy+sg[k+3]*px);}
+      x.stroke();
+    }else{
+      x.fillStyle='rgba(111,230,234,.95)';
+      an.edge.forEach(i=>{const ex=i%an.w,ey=(i/an.w)|0;x.fillRect(ox+ex*px,oy+ey*px,Math.max(2,px*.9),Math.max(2,px*.9));});
+    }
   }
 }
 
