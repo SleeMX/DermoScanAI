@@ -1121,7 +1121,7 @@ function rgb2lab(r,g,b){
 }
 /* Выделение образования: поиск только на коже (маска YCrCb, заполнение дыр, отступ от края руки),
    фон освещения и порог Оцу — только по коже, усиленный учёт красноты, мелкие пятна разрешены. */
-function segmentLesion(d,w,h){
+function segmentLesion(d,w,h,roi){
   const P=w*h,minWH=Math.min(w,h);
 
   /* --- 0. маска кожи --- */
@@ -1159,7 +1159,9 @@ function segmentLesion(d,w,h){
   let coreN=0;for(let i=0;i<P;i++)coreN+=skinCore[i];
   const useSkin=skinN>P*.15&&coreN>P*.08; // кожи мало — работаем по всему кадру, как раньше
   const inSkin=i=>!useSkin||skinF[i];
-  const inCore=i=>!useSkin||skinCore[i];
+  // круг прицела: всё, что вне круга, не учитывается
+  const inRoi=roi?(i=>{const dx=i%w+.5-roi.cx,dy=((i/w)|0)+.5-roi.cy;return dx*dx+dy*dy<=roi.r*roi.r;}):(()=>true);
+  const inCore=i=>(!useSkin||skinCore[i])&&inRoi(i);
 
   /* --- 1. Lab и удаление волос (как раньше) --- */
   const L=new Float32Array(P),Aa=new Float32Array(P),Bb=new Float32Array(P);
@@ -1201,9 +1203,9 @@ function segmentLesion(d,w,h){
 
   /* --- 3. признак «темнее кожи + отличается по цвету + краснее» --- */
   const med=(arr)=>{const s=Float32Array.from(arr).sort();return s.length?s[s.length>>1]:0;};
-  const skinA=[],skinB=[],res=[];
-  for(let i=0;i<P;i+=2){if(!inCore(i))continue;const dl=L[i]-Lbg[i];if(dl>-8){skinA.push(Aa[i]);skinB.push(Bb[i]);}res.push(dl);}
-  const a0=med(skinA),b0=med(skinB);
+  const skinA=[],skinB=[],res=[],skinR=[],skinG=[];
+  for(let i=0;i<P;i+=2){if(!inCore(i))continue;const dl=L[i]-Lbg[i];if(dl>-8){skinA.push(Aa[i]);skinB.push(Bb[i]);const S3=d[i*4]+d[i*4+1]+d[i*4+2]+1;skinR.push(d[i*4]/S3);skinG.push(d[i*4+1]/S3);}res.push(dl);}
+  const a0=med(skinA),b0=med(skinB),r0=med(skinR),g0=med(skinG);
   const rmed=med(res),madL=med(res.map(v=>Math.abs(v-rmed)))||1;
   let f=new Float32Array(P);
   for(let i=0;i<P;i++){
@@ -1211,7 +1213,11 @@ function segmentLesion(d,w,h){
     const dL=Math.max(0,Lbg[i]-L[i]);
     const da=Aa[i]-a0,db=Bb[i]-b0;
     const cw=Lbg[i]>25?.7:.2;
-    f[i]=dL+cw*Math.sqrt(da*da+db*db)+.6*Math.max(0,da);
+    // тень: кожа темнее, но оттенок (нормированные r,g) почти тот же — такой вклад ослабляем
+    let shd=1;
+    if(dL>8&&L[i]>25){const S3=d[i*4]+d[i*4+1]+d[i*4+2]+1,cd=100*Math.hypot(d[i*4]/S3-r0,d[i*4+1]/S3-g0),ratio=cd/dL;
+      if(cd<2.5&&ratio<.06){const q=Math.max(cd/2.5,ratio/.06);shd=.3+.7*q*q;}}
+    f[i]=shd*(dL+cw*Math.sqrt(da*da+db*db))+.6*Math.max(0,da);
   }
   const blur=(src)=>{const t=new Float32Array(P),o=new Float32Array(P);
     for(let y=0;y<h;y++)for(let x=0;x<w;x++){let s=0,c=0;for(let k=-1;k<=1;k++){const xx=x+k;if(xx>=0&&xx<w){s+=src[y*w+xx];c++;}}t[y*w+x]=s/c;}
@@ -1219,6 +1225,7 @@ function segmentLesion(d,w,h){
     return o;};
   f=blur(blur(f));
   if(useSkin)for(let i=0;i<P;i++)if(!skinCore[i])f[i]=0;
+  if(roi)for(let i=0;i<P;i++)if(!inRoi(i))f[i]=0;
 
   /* --- 4. порог Оцу только по коже --- */
   const fs=[];for(let i=0;i<P;i++)if(inCore(i))fs.push(f[i]);
@@ -1242,14 +1249,15 @@ function segmentLesion(d,w,h){
   for(let s=0;s<P;s++){
     if(!bin[s]||lab[s]>=0)continue;
     const id=comps.length,st=[s];lab[s]=id;
-    let area=0,sf=0,sx=0,sy=0,edgeT=0;
+    let area=0,sf=0,sx=0,sy=0,edgeT=0,edgeR=0;
     while(st.length){const i=st.pop();area++;sf+=f[i];const x=i%w,y=(i/w)|0;sx+=x;sy+=y;
       if(x===0||y===0||x===w-1||y===h-1)edgeT++;
+      if(roi&&((x>0&&!inRoi(i-1))||(x<w-1&&!inRoi(i+1))||(y>0&&!inRoi(i-w))||(y<h-1&&!inRoi(i+w))))edgeR++;
       if(x>0&&bin[i-1]&&lab[i-1]<0){lab[i-1]=id;st.push(i-1);}
       if(x<w-1&&bin[i+1]&&lab[i+1]<0){lab[i+1]=id;st.push(i+1);}
       if(y>0&&bin[i-w]&&lab[i-w]<0){lab[i-w]=id;st.push(i-w);}
       if(y<h-1&&bin[i+w]&&lab[i+w]<0){lab[i+w]=id;st.push(i+w);}}
-    comps.push({area,mf:sf/area,cx:sx/area,cy:sy/area,edgeT});
+    comps.push({area,mf:sf/area,cx:sx/area,cy:sy/area,edgeT,edgeR});
   }
   const sig=.28*minWH;let bestC=-1,bestS=0;
   comps.forEach((c,id)=>{
@@ -1259,6 +1267,7 @@ function segmentLesion(d,w,h){
     const perim=2*(w+h);
     if(c.edgeT>perim*.01) sc*=.25;
     if(c.edgeT>perim*.08) sc*=.2;
+    if(roi&&c.edgeR>2*Math.PI*roi.r*.12) sc*=.3; // область, упирающаяся в край круга (тень заходит снаружи)
     if(c.edgeT>perim*.03&&Math.sqrt(dist2)>.3*minWH) return;
     if(sc>bestS){bestS=sc;bestC=id;}
   });
@@ -1313,7 +1322,7 @@ function maskContour(mask,w,h){
 }
 /* Уточнение контура по снимку в высоком разрешении: граница ищется только в узкой полосе вокруг найденной маски.
    Признаки A, B, C, D и история по-прежнему считаются по маске 200 px. */
-function refineContour(src,mask,w,h){
+function refineContour(src,mask,w,h,roi){
   try{
     const SW=src.width,SH=src.height,P=w*h;
     let bx0=w,bx1=-1,by0=h,by1=-1,area=0;
@@ -1355,6 +1364,7 @@ function refineContour(src,mask,w,h){
     const bin=new Uint8Array(Q);let bn=0;
     for(let i=0;i<Q;i++){let v;
       if(ms[i]>=.97)v=1;else if(ms[i]<=.03)v=0;else v=((L[i]-Lo)*vL+(A[i]-Ao)*vA+(B[i]-Bo)*vB)/n2;
+      if(roi){const mx=X0+(i%cw+.5)/fx-roi.cx,my=Y0+(((i/cw)|0)+.5)/fy-roi.cy;if(mx*mx+my*my>roi.r*roi.r)v=0;}
       if(v>=lev){bin[i]=1;bn++;}}
     // самая крупная связная часть + заполнение дыр
     const keep=new Uint8Array(Q);
@@ -1380,6 +1390,15 @@ function refineContour(src,mask,w,h){
     return seg;
   }catch(e){return null;}
 }
+/* Круг прицела на экране сканирования → круг в координатах маски анализа (снимок вписан в окно по принципу cover) */
+function ringROI(src,w,h){
+  const box=document.getElementById('scanbox'),ring=document.getElementById('ring');
+  const W=box?box.clientWidth:0,H=box?box.clientHeight:0;
+  if(!W||!H||!src.width||!src.height)return null;
+  const R=((ring&&ring.clientWidth)||170)/2;
+  const s=Math.max(W/src.width,H/src.height);
+  return {cx:w/2,cy:h/2,r:R/s*(w/src.width)};
+}
 function analyze(src){
   const N=200,k=N/Math.max(src.width,src.height);
   const w=Math.max(16,Math.round(src.width*k)),h=Math.max(16,Math.round(src.height*k));
@@ -1396,7 +1415,8 @@ function analyze(src){
   quality.ok=quality.light==='норма'&&quality.focus==='резко';
   const fc=document.createElement('canvas');fc.width=w*2;fc.height=h*2;fc.getContext('2d').drawImage(src,0,0,fc.width,fc.height);
   const frame=fc.toDataURL('image/jpeg',.8);
-  const mask=segmentLesion(d,w,h);
+  const roi=ringROI(src,w,h);
+  const mask=segmentLesion(d,w,h,roi);
   if(!mask) return {found:false,quality,w,h,frame};
   let area=0,sx=0,sy=0,x0=w,x1=0,y0=h,y1=0;
   for(let i=0;i<P;i++){if(!mask[i])continue;area++;const px=i%w,py=(i/w)|0;sx+=px;sy+=py;
@@ -1427,7 +1447,7 @@ function analyze(src){
   const risk=clamp(.35*nA+.3*nB+.25*nC+.1*nD);
   const size=Math.max(x1-x0,y1-y0)*1.8+6;
   const crop={x:cx-size/2,y:cy-size/2,s:size};
-  const contour=refineContour(src,mask,w,h)||maskContour(mask,w,h);
+  const contour=refineContour(src,mask,w,h,roi)||maskContour(mask,w,h);
   return {found:true,quality,w,h,mask,edge,contour,cx,cy,frac,A,B,C,D,nA,nB,nC,nD,risk,lab,crop,frame};
 }
 function encodeRLE(m){const out=[];let v=0,run=0;for(let i=0;i<m.length;i++){if(m[i]===v)run++;else{out.push(run);run=1;v^=1;}}out.push(run);return out.join(',');}
